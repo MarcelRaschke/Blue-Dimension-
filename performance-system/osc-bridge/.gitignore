@@ -1,0 +1,15 @@
+osc-bridge
+*.exe
+*.dll
+*.so
+*.dylib
+vendor/
+.DS_Store
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.log
+.env
+.env.local
