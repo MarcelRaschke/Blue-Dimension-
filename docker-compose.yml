@@ -1,0 +1,161 @@
+version: '3.8'
+
+services:
+  # Icecast streaming server
+  icecast:
+    image: infiniteproject/icecast:latest
+    container_name: blue-dimension-icecast
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      ICECAST_SOURCE_PASSWORD: ${ICECAST_SOURCE_PASSWORD:-changeme}
+      ICECAST_RELAY_PASSWORD: ${ICECAST_RELAY_PASSWORD:-changeme}
+      ICECAST_ADMIN_PASSWORD: ${ICECAST_ADMIN_PASSWORD:-changeme}
+      ICECAST_HOSTNAME: ${ICECAST_HOSTNAME:-localhost}
+      ICECAST_PORT: "8000"
+    volumes:
+      - ./config/icecast.xml:/etc/icecast/icecast.xml:ro
+      - icecast-logs:/var/log/icecast
+    networks:
+      - blue-dimension
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/status.xsl"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Stream Engine (FFmpeg + Node.js audio processing)
+  stream-engine:
+    build:
+      context: ./performance-system/stream-engine
+      dockerfile: Dockerfile
+    container_name: blue-dimension-stream-engine
+    restart: unless-stopped
+    depends_on:
+      icecast:
+        condition: service_healthy
+    environment:
+      ICECAST_URL: "icecast://source:${ICECAST_SOURCE_PASSWORD:-changeme}@icecast:8000/blue-dimension"
+      ICECAST_HOST: "icecast"
+      ICECAST_PORT: "8000"
+      AUDIO_INPUT: ${AUDIO_INPUT:-hw:0}
+      BITRATE: ${BITRATE:-256k}
+      SAMPLE_RATE: ${SAMPLE_RATE:-44100}
+      PORT: "5001"
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      NODE_ENV: ${NODE_ENV:-production}
+    ports:
+      - "5001:5001"
+    devices:
+      - /dev/snd:/dev/snd
+    volumes:
+      - stream-archive:/var/lib/blue-dimension/archive
+      - stream-logs:/var/lib/blue-dimension/logs
+    networks:
+      - blue-dimension
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # OSC Bridge (Go CDJ synchronization)
+  osc-bridge:
+    build:
+      context: ./performance-system/osc-bridge
+      dockerfile: Dockerfile
+    container_name: blue-dimension-osc-bridge
+    restart: unless-stopped
+    environment:
+      CDJ_OSC_PORT: "7700"
+      ABLETON_OSC_ADDR: ${ABLETON_OSC_ADDR:-host.docker.internal:11000}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "7700:7700/udp"
+    networks:
+      - blue-dimension
+    healthcheck:
+      test: ["CMD", "netstat", "-tulnp", "|", "grep", "7700"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  # API Server (Express + WebSocket + SQLite)
+  api-server:
+    build:
+      context: ./performance-system/api-server
+      dockerfile: Dockerfile
+    container_name: blue-dimension-api-server
+    restart: unless-stopped
+    depends_on:
+      stream-engine:
+        condition: service_healthy
+    environment:
+      PORT: "5000"
+      DB_PATH: "/app/data/database.sqlite"
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      NODE_ENV: ${NODE_ENV:-production}
+      STREAM_ENGINE_URL: "http://stream-engine:5001"
+      ICECAST_URL: "http://icecast:8000"
+    ports:
+      - "5000:5000"
+    volumes:
+      - api-data:/app/data
+      - stream-archive:/var/lib/blue-dimension/archive:ro
+      - api-logs:/var/lib/blue-dimension/logs
+    networks:
+      - blue-dimension
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Web Dashboard (React + Nginx)
+  web-dashboard:
+    build:
+      context: ./performance-system/web-dashboard
+      dockerfile: Dockerfile
+    container_name: blue-dimension-dashboard
+    restart: unless-stopped
+    environment:
+      API_HOST: "api-server:5000"
+      NGINX_HOST: ${NGINX_HOST:-localhost}
+      NGINX_PORT: "3000"
+    ports:
+      - "3000:3000"
+    depends_on:
+      api-server:
+        condition: service_healthy
+    networks:
+      - blue-dimension
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+networks:
+  blue-dimension:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  icecast-logs:
+    driver: local
+  stream-archive:
+    driver: local
+  stream-logs:
+    driver: local
+  api-data:
+    driver: local
+  api-logs:
+    driver: local
