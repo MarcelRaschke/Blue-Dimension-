@@ -25,8 +25,14 @@ export class AudioEngine {
         const mountPoint = parsedIcecastUrl.pathname || '/blue-dimension';
         const password = parsedIcecastUrl.password || 'changeme';
 
+        const audioDeviceMatch = this.config.audioInput.match(/^hw:(\d+)(?::(\d+))?$/);
+        if (!audioDeviceMatch) {
+          throw new Error('Invalid audio input format. Use hw:card[:device]');
+        }
+        const audioDevice = audioDeviceMatch[0];
+
         this.logger.info({
-          audioInput: this.config.audioInput,
+          audioInput: audioDevice,
           bitrate: this.config.bitrate,
           sampleRate: this.config.sampleRate,
           icecastHost,
@@ -35,7 +41,7 @@ export class AudioEngine {
         }, 'Starting FFmpeg process');
 
         const command = ffmpeg()
-          .input(`hw:${this.config.audioInput.split(':')[1] || '0'}`)
+          .input(audioDevice)
           .inputOptions([
             '-f', 'alsa',
             '-ar', this.config.sampleRate,
