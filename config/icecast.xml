@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<icecast>
+  <limits>
+    <clients>100</clients>
+    <sources>10</sources>
+    <queue-size>524288</queue-size>
+    <client-timeout>30</client-timeout>
+    <header-timeout>15</header-timeout>
+    <source-timeout>30</source-timeout>
+    <burst-on-connect>1</burst-on-connect>
+    <burst-size>65535</burst-size>
+  </limits>
+
+  <authentication>
+    <source-password>${ICECAST_SOURCE_PASSWORD:-changeme}</source-password>
+    <relay-password>${ICECAST_RELAY_PASSWORD:-changeme}</relay-password>
+    <admin-user>admin</admin-user>
+    <admin-password>${ICECAST_ADMIN_PASSWORD:-changeme}</admin-password>
+  </authentication>
+
+  <listen-socket>
+    <port>8000</port>
+    <bind-address>0.0.0.0</bind-address>
+  </listen-socket>
+
+  <hostname>${ICECAST_HOSTNAME:-localhost}</hostname>
+
+  <fileserve>1</fileserve>
+
+  <paths>
+    <basedir>/usr/share/icecast</basedir>
+    <logdir>/var/log/icecast</logdir>
+    <webroot>/usr/share/icecast/web</webroot>
+    <adminroot>/usr/share/icecast/admin</adminroot>
+    <alias source="/" dest="/status.xsl"/>
+  </paths>
+
+  <logging>
+    <accesslog>access.log</accesslog>
+    <errorlog>error.log</errorlog>
+    <loglevel>3</loglevel>
+    <logsize>10000</logsize>
+  </logging>
+
+  <security>
+    <ssl>0</ssl>
+    <ssl-certificate></ssl-certificate>
+  </security>
+
+  <mount>
+    <mount-name>/blue-dimension</mount-name>
+    <description>Blue Dimension Live DJ Performance Stream</description>
+    <genre>Electronic</genre>
+    <type>audio/mpeg</type>
+    <bitrate>256</bitrate>
+    <hidden>0</hidden>
+    <public>1</public>
+    <authentication type="default">
+      <option name="requires_auth" val="0"/>
+      <option name="auth_header" val="icecast-auth"/>
+    </authentication>
+    <on-connect>/usr/local/scripts/on_connect.sh</on-connect>
+    <on-disconnect>/usr/local/scripts/on_disconnect.sh</on-disconnect>
+  </mount>
+
+  <http-headers>
+    <header name="Access-Control-Allow-Origin" value="*"/>
+    <header name="Access-Control-Allow-Methods" value="GET, HEAD, OPTIONS"/>
+    <header name="Access-Control-Allow-Headers" value="Content-Type"/>
+  </http-headers>
+
+  <relays-on-demand>1</relays-on-demand>
+</icecast>
