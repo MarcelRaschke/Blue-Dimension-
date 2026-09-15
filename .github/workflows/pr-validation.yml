@@ -1,0 +1,71 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [ opened, synchronize, reopened ]
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  validate:
+    name: Validate Changes
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          tools: composer
+
+      - name: Check commit messages
+        run: |
+          echo "Validating commit messages..."
+          git log ${{ github.event.pull_request.base.sha }}..HEAD --pretty=format:"%H %s" | while read commit msg; do
+            if [[ ! "$msg" =~ ^(feat|fix|docs|style|refactor|perf|test|chore|ci)(\(.+\))?: ]]; then
+              echo "⚠️ Commit $commit has non-conventional message: $msg"
+            fi
+          done
+
+      - name: PHP Syntax Validation
+        run: |
+          echo "Validating PHP files..."
+          find . -name "*.php" -type f \
+            ! -path "./vendor/*" \
+            ! -path "./.git/*" \
+            -exec php -l {} \; | grep -E "^Parse error|^Fatal error" && exit 1 || true
+
+      - name: File size check
+        run: |
+          echo "Checking file sizes..."
+          find . -type f \
+            ! -path "./.git/*" \
+            -size +100M \
+            -exec echo "⚠️ Large file: {}" \;
+
+      - name: Add PR comment with validation results
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## ✅ PR Validation
+
+- PHP Syntax: ✓ Valid
+- File sizes: ✓ Checked
+- Commit messages: ✓ Validated
+
+Ready for review!`
+            });

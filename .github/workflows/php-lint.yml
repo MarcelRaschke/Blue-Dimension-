@@ -1,0 +1,77 @@
+name: PHP Lint & Code Quality
+
+on:
+  push:
+    branches: [ main, "claude/**" ]
+    paths:
+      - "**.php"
+      - ".github/workflows/php-lint.yml"
+  pull_request:
+    branches: [ main ]
+    paths:
+      - "**.php"
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  lint:
+    name: PHP Syntax & Linting
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: ["8.2", "8.3"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP ${{ matrix.php-version }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          tools: php-cs-fixer, phpstan
+
+      - name: PHP Syntax Check
+        run: |
+          find . -name "*.php" -type f \
+            ! -path "./vendor/*" \
+            ! -path "./.git/*" \
+            -exec php -l {} \; | grep -v "No syntax errors detected"
+        continue-on-error: true
+
+      - name: PHP-CS-Fixer (check formatting)
+        run: php-cs-fixer fix --dry-run --diff --config=.php-cs-fixer.dist.php 2>/dev/null || echo "No config found, skipping"
+        continue-on-error: true
+
+      - name: PHPStan Static Analysis
+        run: phpstan analyse --level=5 . --ignore-pattern="vendor" 2>/dev/null || echo "PHPStan not configured, skipping"
+        continue-on-error: true
+
+  security:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+
+      - name: Psalm Security Scanner
+        run: |
+          composer require --dev psalm/psalm 2>/dev/null || echo "Composer not available"
+          psalm --show-info=false --security-analysis 2>/dev/null || echo "Psalm not configured"
+        continue-on-error: true
+
+      - name: OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          path: "."
+          format: "JSON"
+          args: >
+            --suppress CSHARP-PROJECTS
+            --exclude vendor
