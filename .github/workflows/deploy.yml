@@ -35,6 +35,7 @@ jobs:
             -exec php -l {} \;
 
       - name: Create deployment
+        id: create_deployment
         uses: actions/github-script@v7
         with:
           script: |
@@ -56,8 +57,9 @@ jobs:
             github.rest.repos.createDeploymentStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              deployment_id: ${{ steps.deploy.outputs.deployment_id || 1 }},
-              state: 'in_progress'
+              deployment_id: ${{ steps.create_deployment.outputs.deployment_id }},
+              state: 'in_progress',
+              description: 'Starting deployment to production'
             });
 
       - name: Build/Prepare assets
@@ -67,6 +69,34 @@ jobs:
             ! -path "./.git/*" \
             ! -path "./.github/*" | wc -l
 
+      - name: Deploy via SFTP
+        id: deploy
+        uses: easingthemes/ssh-deploy@main
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_KEY }}
+          REMOTE_HOST: ${{ secrets.DEPLOY_HOST }}
+          REMOTE_USER: ${{ secrets.DEPLOY_USER }}
+          REMOTE_PATH: /home/${{ secrets.DEPLOY_USER }}/public_html/
+          ARGS: "-avz --delete"
+          EXCLUDE: |
+            .git/
+            .github/
+            node_modules/
+            vendor/
+            .env
+            .env.local
+            *.swp
+            *.swo
+            *~
+            .DS_Store
+            npm-debug.log
+            package-lock.json
+
+      - name: Verify deployment health
+        run: |
+          chmod +x ./scripts/verify-deployment.sh
+          ./scripts/verify-deployment.sh "https://djjessejay.ch"
+
       - name: Update deployment status - success
         if: success()
         uses: actions/github-script@v7
@@ -75,9 +105,10 @@ jobs:
             github.rest.repos.createDeploymentStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              deployment_id: ${{ steps.deploy.outputs.deployment_id || 1 }},
+              deployment_id: ${{ steps.create_deployment.outputs.deployment_id }},
               state: 'success',
-              description: 'Deployment succeeded'
+              description: 'Deployment succeeded - health check passed',
+              environment_url: 'https://djjessejay.ch'
             });
 
       - name: Update deployment status - failure
@@ -88,7 +119,7 @@ jobs:
             github.rest.repos.createDeploymentStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              deployment_id: ${{ steps.deploy.outputs.deployment_id || 1 }},
+              deployment_id: ${{ steps.create_deployment.outputs.deployment_id }},
               state: 'failure',
-              description: 'Deployment failed'
+              description: 'Deployment failed - health check or SFTP upload failed'
             });
