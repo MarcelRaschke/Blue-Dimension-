@@ -35,6 +35,7 @@ jobs:
             -exec php -l {} \;
 
       - name: Create deployment
+        id: create_deployment
         uses: actions/github-script@v7
         with:
           script: |
@@ -56,8 +57,9 @@ jobs:
             github.rest.repos.createDeploymentStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              deployment_id: ${{ steps.deploy.outputs.deployment_id || 1 }},
-              state: 'in_progress'
+              deployment_id: ${{ steps.create_deployment.outputs.deployment_id }},
+              state: 'in_progress',
+              description: 'Starting deployment to production'
             });
 
       - name: Build/Prepare assets
@@ -67,6 +69,119 @@ jobs:
             ! -path "./.git/*" \
             ! -path "./.github/*" | wc -l
 
+      - name: Create pre-deployment backup
+        id: backup
+        run: |
+          chmod +x ./scripts/backup-deployment.sh
+          ./scripts/backup-deployment.sh "${{ secrets.DEPLOY_HOST }}" "${{ secrets.DEPLOY_USER }}" || {
+            echo "warning: Backup creation failed, continuing with deployment"
+          }
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+
+      - name: Deploy via SFTP
+        id: deploy
+        uses: easingthemes/ssh-deploy@main
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_KEY }}
+          REMOTE_HOST: ${{ secrets.DEPLOY_HOST }}
+          REMOTE_USER: ${{ secrets.DEPLOY_USER }}
+          REMOTE_PATH: /home/${{ secrets.DEPLOY_USER }}/public_html/
+          ARGS: "-avz --delete"
+          EXCLUDE: |
+            .git/
+            .github/
+            node_modules/
+            vendor/
+            .env
+            .env.local
+            *.swp
+            *.swo
+            *~
+            .DS_Store
+            npm-debug.log
+            package-lock.json
+
+      - name: Verify deployment health
+        id: verify
+        run: |
+          chmod +x ./scripts/verify-deployment.sh
+          ./scripts/verify-deployment.sh "https://djjessejay.ch"
+
+      - name: Rollback on health check failure
+        if: failure() && steps.verify.outcome == 'failure'
+        run: |
+          echo "Health check failed, initiating rollback..."
+          chmod +x ./scripts/restore-deployment.sh
+          ./scripts/restore-deployment.sh "${{ secrets.DEPLOY_HOST }}" "${{ secrets.DEPLOY_USER }}" || {
+            echo "error: Rollback failed - manual intervention required"
+            exit 1
+          }
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+
+      - name: Send Slack notification - success
+        if: success()
+        uses: slackapi/slack-github-action@v1
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          payload: |
+            {
+              "text": "✅ Deployment successful to production",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "✅ *Deployment Successful*\n*Environment*: Production (djjessejay.ch)\n*Commit*: <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n*Branch*: ${{ github.ref_name }}\n*Status*: All health checks passed"
+                  }
+                }
+              ]
+            }
+        continue-on-error: true
+
+      - name: Send Slack notification - failure with rollback
+        if: failure() && steps.verify.outcome == 'failure'
+        uses: slackapi/slack-github-action@v1
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          payload: |
+            {
+              "text": "❌ Deployment failed and rolled back",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "❌ *Deployment Failed & Rolled Back*\n*Environment*: Production (djjessejay.ch)\n*Commit*: <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n*Branch*: ${{ github.ref_name }}\n*Reason*: Health check failed\n*Action*: Automatic rollback to previous version successful"
+                  }
+                }
+              ]
+            }
+        continue-on-error: true
+
+      - name: Send Slack notification - deployment error
+        if: failure() && steps.deploy.outcome == 'failure'
+        uses: slackapi/slack-github-action@v1
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          payload: |
+            {
+              "text": "⚠️ Deployment error - SFTP upload failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "⚠️ *Deployment Error*\n*Environment*: Production (djjessejay.ch)\n*Commit*: <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha }}>\n*Branch*: ${{ github.ref_name }}\n*Reason*: SFTP upload failed\n*Action*: No changes deployed, rollback not necessary"
+                  }
+                }
+              ]
+            }
+        continue-on-error: true
+
       - name: Update deployment status - success
         if: success()
         uses: actions/github-script@v7
@@ -75,9 +190,10 @@ jobs:
             github.rest.repos.createDeploymentStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              deployment_id: ${{ steps.deploy.outputs.deployment_id || 1 }},
+              deployment_id: ${{ steps.create_deployment.outputs.deployment_id }},
               state: 'success',
-              description: 'Deployment succeeded'
+              description: 'Deployment succeeded - health check passed',
+              environment_url: 'https://djjessejay.ch'
             });
 
       - name: Update deployment status - failure
@@ -88,7 +204,7 @@ jobs:
             github.rest.repos.createDeploymentStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              deployment_id: ${{ steps.deploy.outputs.deployment_id || 1 }},
+              deployment_id: ${{ steps.create_deployment.outputs.deployment_id }},
               state: 'failure',
-              description: 'Deployment failed'
+              description: 'Deployment failed or rolled back to previous version'
             });
