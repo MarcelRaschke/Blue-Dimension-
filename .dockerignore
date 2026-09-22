@@ -1,0 +1,83 @@
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# GitHub
+.github
+.gitmodules
+
+# Development
+.env.local
+.env.*.local
+.DS_Store
+Thumbs.db
+
+# Dependencies
+node_modules
+vendor
+composer.lock
+package-lock.json
+yarn.lock
+
+# IDE/Editor
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.project
+.settings
+.classpath
+*.sublime-project
+*.sublime-workspace
+
+# Build artifacts
+build/
+dist/
+coverage/
+.next/
+out/
+
+# Temporary files
+*.log
+tmp/
+temp/
+.cache/
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# CI/CD
+.github/workflows
+.gitlab-ci.yml
+.travis.yml
+Jenkinsfile
+
+# Documentation
+*.md
+docs/
+CHANGELOG*
+LICENSE*
+README*
+
+# OS specific
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# Backup/Archive
+*.bak
+*.backup
+*.tar.gz
+*.zip
+*.rar
+
+# Performance system (separate Docker setup)
+performance-system/
