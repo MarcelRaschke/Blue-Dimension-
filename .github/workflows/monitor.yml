@@ -1,0 +1,208 @@
+name: Continuous Health Monitoring
+
+on:
+  schedule:
+    # Run health checks every 5 minutes
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/monitor.yml'
+      - 'public/health.php'
+      - 'public/health/check.json.php'
+      - 'scripts/verify-deployment.sh'
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  health-check:
+    name: Production Health Check
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://djjessejay.ch
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check simple health endpoint
+        id: simple_health
+        continue-on-error: true
+        run: |
+          echo "Checking /health.php endpoint..."
+          RESPONSE=$(curl -s -w "\n%{http_code}" https://djjessejay.ch/health.php)
+          STATUS_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "Status Code: $STATUS_CODE"
+          echo "Response: $BODY"
+
+          if [ "$STATUS_CODE" != "200" ]; then
+            echo "::error::Simple health check failed with status $STATUS_CODE"
+            exit 1
+          fi
+
+          echo "health_status=ok" >> $GITHUB_OUTPUT
+
+      - name: Check detailed health endpoint
+        id: detailed_health
+        continue-on-error: true
+        run: |
+          echo "Checking /health/check.json.php endpoint..."
+          START_TIME=$(date +%s%N)
+          RESPONSE=$(curl -s -w "\n%{http_code}" https://djjessejay.ch/health/check.json.php)
+          END_TIME=$(date +%s%N)
+
+          STATUS_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+          RESPONSE_TIME_MS=$(( (END_TIME - START_TIME) / 1000000 ))
+
+          echo "Status Code: $STATUS_CODE"
+          echo "Response Time: ${RESPONSE_TIME_MS}ms"
+          echo "Response: $BODY"
+
+          if [ "$STATUS_CODE" != "200" ]; then
+            echo "::error::Detailed health check failed with status $STATUS_CODE"
+            exit 1
+          fi
+
+          if [ $RESPONSE_TIME_MS -gt 2000 ]; then
+            echo "::warning::Response time (${RESPONSE_TIME_MS}ms) exceeds threshold (2000ms)"
+          fi
+
+          echo "response_time=$RESPONSE_TIME_MS" >> $GITHUB_OUTPUT
+          echo "detailed_health=ok" >> $GITHUB_OUTPUT
+
+      - name: Check performance metrics endpoint
+        id: metrics
+        continue-on-error: true
+        run: |
+          echo "Checking /health/metrics.json.php endpoint..."
+          START_TIME=$(date +%s%N)
+          RESPONSE=$(curl -s -w "\n%{http_code}" https://djjessejay.ch/health/metrics.json.php)
+          END_TIME=$(date +%s%N)
+
+          STATUS_CODE=$(echo "$RESPONSE" | tail -1)
+          RESPONSE_TIME_MS=$(( (END_TIME - START_TIME) / 1000000 ))
+
+          echo "Status Code: $STATUS_CODE"
+          echo "Response Time: ${RESPONSE_TIME_MS}ms"
+
+          if [ "$STATUS_CODE" != "200" ]; then
+            echo "::warning::Metrics endpoint failed with status $STATUS_CODE (non-critical)"
+          fi
+
+          echo "metrics_response_time=$RESPONSE_TIME_MS" >> $GITHUB_OUTPUT
+          echo "metrics_available=true" >> $GITHUB_OUTPUT
+
+      - name: Record deployment metrics
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const timestamp = new Date().toISOString();
+            const simpleHealth = '${{ steps.simple_health.outputs.health_status }}' === 'ok' ? 'pass' : 'fail';
+            const detailedHealth = '${{ steps.detailed_health.outputs.detailed_health }}' === 'ok' ? 'pass' : 'fail';
+            const responseTime = '${{ steps.detailed_health.outputs.response_time }}' || 'unknown';
+            const metricsResponseTime = '${{ steps.metrics.outputs.metrics_response_time }}' || 'unavailable';
+
+            console.log(`[${timestamp}] Health Check Results:`);
+            console.log(`  Simple Health: ${simpleHealth}`);
+            console.log(`  Detailed Health: ${detailedHealth}`);
+            console.log(`  Response Time: ${responseTime}ms`);
+            console.log(`  Metrics Response Time: ${metricsResponseTime}ms`);
+
+            // Record metrics in job summary
+            const summary = `
+## 🏥 Production Health Check
+
+| Metric | Status |
+|--------|--------|
+| Simple Health (/health.php) | ${simpleHealth === 'pass' ? '✅ PASS' : '❌ FAIL'} |
+| Detailed Health (/health/check.json.php) | ${detailedHealth === 'pass' ? '✅ PASS' : '❌ FAIL'} |
+| Response Time (Detailed) | ${responseTime}ms |
+| Performance Metrics | ${metricsResponseTime}ms |
+| Check Time | ${timestamp} |
+
+${simpleHealth === 'fail' || detailedHealth === 'fail' ? '### ⚠️ ALERT: Production health check failed!' : '### ✅ All systems operational'}
+            `;
+
+            require('fs').appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary);
+
+      - name: Send Slack notification - health alert
+        if: failure()
+        uses: slackapi/slack-github-action@v1
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
+          payload: |
+            {
+              "text": "⚠️ Production health check failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "⚠️ *Production Health Alert*\n*Environment*: djjessejay.ch\n*Status*: Health check failed\n*Timestamp*: ${{ env.CURRENT_TIME }}\n*Simple Health*: ${{ steps.simple_health.outcome }}\n*Detailed Health*: ${{ steps.detailed_health.outcome }}"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow Run>"
+                  }
+                }
+              ]
+            }
+        continue-on-error: true
+        env:
+          CURRENT_TIME: ${{ github.event.head_commit.timestamp || now() }}
+
+  deployment-history:
+    name: Track Deployment History
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get latest deployment info
+        id: deployment_info
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deployments = await github.rest.repos.listDeployments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              environment: 'production',
+              per_page: 5
+            });
+
+            let summary = '## 📊 Recent Deployment History\n\n';
+            summary += '| Commit | Status | Time |\n';
+            summary += '|--------|--------|------|\n';
+
+            for (const deployment of deployments.data) {
+              const status = deployment.statuses[0]?.state || 'unknown';
+              const statusEmoji = status === 'success' ? '✅' : status === 'failure' ? '❌' : '⏳';
+              const commitUrl = `${context.payload.repository.html_url}/commit/${deployment.sha}`;
+              const shortSha = deployment.sha.substring(0, 7);
+              const time = new Date(deployment.created_at).toLocaleString();
+
+              summary += `| [${shortSha}](${commitUrl}) | ${statusEmoji} ${status} | ${time} |\n`;
+            }
+
+            summary += '\n### Statistics\n';
+            summary += `- Total deployments: ${deployments.data.length}\n`;
+
+            const successful = deployments.data.filter(d => d.statuses[0]?.state === 'success').length;
+            const successRate = deployments.data.length > 0 ? (successful / deployments.data.length * 100).toFixed(1) : 0;
+            summary += `- Success rate: ${successRate}%\n`;
+
+            require('fs').appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary);
+
+            console.log('Deployment history tracked');

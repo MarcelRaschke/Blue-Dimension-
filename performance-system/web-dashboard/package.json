@@ -1,0 +1,30 @@
+{
+  "name": "blue-dimension-dashboard",
+  "version": "1.0.0",
+  "description": "Live DJ performance monitoring dashboard for Blue Dimension",
+  "main": "public/index.html",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext .jsx,.js",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "axios": "^1.8.0",
+    "date-fns": "^3.6.0",
+    "lucide-react": "^0.408.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.2.11",
+    "tailwindcss": "^3.4.3",
+    "postcss": "^8.4.38",
+    "autoprefixer": "^10.4.19",
+    "typescript": "^5.4.5",
+    "eslint": "^9.2.0"
+  }
+}

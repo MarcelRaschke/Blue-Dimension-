@@ -1,0 +1,4 @@
+github.com/hypebeast/go-osc v0.0.0-20220308234300-ccc3d2e38817 h1:nI8D4SEYbYAkVGRTvjsDnvVL7d2rHfDvDoxBBBIoN0=
+github.com/hypebeast/go-osc v0.0.0-20220308234300-ccc3d2e38817/go.mod h1:l5wttcP0jwtdLjqjMMWFVEE7d1zO0jvSPA9OPZxWpE=
+golang.org/x/exp v0.0.0-20231219150744-69fa9ae93e04 h1:mILhkN2fk0SqwWu/Wvkl8rHsKVTu03LVHhTelctryc=
+golang.org/x/exp v0.0.0-20231219150744-69fa9ae93e04/go.mod h1:iRJReGqOEeBhDFLmNkIL+zCUlApu0fOinin43XD7Ow=

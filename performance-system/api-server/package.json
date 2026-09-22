@@ -1,0 +1,27 @@
+{
+  "name": "blue-dimension-api-server",
+  "version": "1.0.0",
+  "description": "Blue Dimension API Server - Metadata, performance tracking, and stream control",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon --exec node src/index.js",
+    "lint": "eslint src --fix",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "pino": "^8.16.2",
+    "pino-http": "^8.5.1",
+    "sqlite3": "^5.1.6",
+    "axios": "^1.8.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "eslint": "^8.52.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
