@@ -1,0 +1,94 @@
+:root {
+    --bg: #0b0716;
+    --panel: #161029;
+    --text: #e9e4ff;
+    --muted: #9b92c4;
+    --neon-pink: #ff2e9a;
+    --neon-cyan: #2ef2ff;
+    --link: var(--neon-cyan);
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+a { color: var(--link); }
+a:focus-visible { outline: 2px solid var(--neon-pink); outline-offset: 2px; }
+
+.site-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.5rem;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 16px;
+    border-bottom: 1px solid var(--neon-pink);
+}
+
+.brand {
+    color: var(--neon-pink);
+    font-weight: 700;
+    text-decoration: none;
+    letter-spacing: 0.04em;
+}
+
+.site-nav { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; }
+.site-nav a { text-decoration: none; }
+.site-nav a[aria-current="page"] { color: var(--neon-pink); }
+
+.site-main {
+    max-width: 52rem;
+    margin: 0 auto;
+    padding: 1.5rem 16px;
+}
+
+.site-footer {
+    padding: 1rem 16px 2rem;
+    text-align: center;
+    color: var(--muted);
+    border-top: 1px solid var(--panel);
+}
+
+h1, h2 { line-height: 1.2; }
+h1 { color: var(--neon-pink); }
+
+.hero { margin-bottom: 2rem; }
+.tagline { color: var(--neon-cyan); font-size: 1.1rem; }
+.muted { color: var(--muted); }
+
+.card {
+    background: var(--panel);
+    border-left: 3px solid var(--neon-cyan);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    margin: 0 0 1rem;
+}
+
+.comment { white-space: normal; }
+
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { padding: 0.5rem; border-bottom: 1px solid var(--panel); text-align: left; }
+
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 8px;
+    margin-bottom: 2rem;
+}
+.gallery img { width: 100%; height: auto; display: block; border-radius: 4px; }
+
+.lang-switch { display: flex; gap: 1rem; margin-bottom: 1rem; }
+.lang-switch a[aria-current="true"] { color: var(--neon-pink); font-weight: 700; }
+
+.link-list { padding-left: 1.2rem; }
+
+.prose { overflow-wrap: anywhere; }
+
+@media (max-width: 480px) {
+    .site-header { flex-direction: column; align-items: flex-start; }
+}
