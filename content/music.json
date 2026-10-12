@@ -1,0 +1,177 @@
+[
+    {
+        "id": 1,
+        "eventId": 10,
+        "style": "josefs ruhe special",
+        "play": "http://195.210.0.134:554/ramgen/lora/archiv/20030502.rm",
+        "download": ""
+    },
+    {
+        "id": 4,
+        "eventId": 26,
+        "style": "groovy deep'n'progress",
+        "play": "http://195.210.0.134:554/ramgen/lora/archiv/20030418.rm",
+        "download": ""
+    },
+    {
+        "id": 5,
+        "eventId": 27,
+        "style": "Local Progressive",
+        "play": "http://193.192.228.134:554/ramgen/lora/archiv/20030516.rm?start=00:00:00",
+        "download": ""
+    },
+    {
+        "id": 6,
+        "eventId": 28,
+        "style": "progressive",
+        "play": "http://195.210.0.134:554/ramgen/lora/archiv/20030530.rm",
+        "download": ""
+    },
+    {
+        "id": 7,
+        "eventId": 33,
+        "style": "groovy deep'n'progress",
+        "play": "http://195.210.0.134:554/lora/archiv/20030711.rm?",
+        "download": ""
+    },
+    {
+        "id": 8,
+        "eventId": 47,
+        "style": "progressive",
+        "play": "http://195.210.0.134:554/lora/archiv/20030822.rm",
+        "download": ""
+    },
+    {
+        "id": 9,
+        "eventId": 38,
+        "style": "progressive",
+        "play": "http://195.210.0.134:554/lora/archiv/20030822.rm",
+        "download": ""
+    },
+    {
+        "id": 10,
+        "eventId": 48,
+        "style": "progressive",
+        "play": "http://195.210.0.134:554/lora/archiv/20030822.rm",
+        "download": ""
+    },
+    {
+        "id": 11,
+        "eventId": 48,
+        "style": "progressive",
+        "play": "http://195.210.0.134:554/lora/archiv/20030822.rm",
+        "download": ""
+    },
+    {
+        "id": 12,
+        "eventId": 49,
+        "style": "progressive",
+        "play": "http://195.210.0.134:554/lora/archiv/20030822.rm",
+        "download": ""
+    },
+    {
+        "id": 13,
+        "eventId": 63,
+        "style": "progressive",
+        "play": "http://195.210.0.134:554/ramgen/lora/archiv/20030919.rm",
+        "download": ""
+    },
+    {
+        "id": 14,
+        "eventId": 65,
+        "style": "progressive",
+        "play": "http://195.210.0.134:554/lora/archiv/20031003.rm?",
+        "download": ""
+    },
+    {
+        "id": 16,
+        "eventId": 71,
+        "style": "SexyProgressive",
+        "play": "http://193.192.228.134:554/ramgen/lora/archiv/20031226.rm?start=00:00:00",
+        "download": ""
+    },
+    {
+        "id": 18,
+        "eventId": 84,
+        "style": "progressive",
+        "play": "http://195.210.0.134:554/ramgen/lora/archiv/20031212.rm?",
+        "download": ""
+    },
+    {
+        "id": 19,
+        "eventId": 87,
+        "style": "JingleBeats",
+        "play": "http://193.192.228.134:554/ramgen/lora/archiv/20031226.rm?start=00:00:00",
+        "download": ""
+    },
+    {
+        "id": 20,
+        "eventId": 97,
+        "style": "progressive",
+        "play": "http://195.210.0.134:554/ramgen/lora/archiv/20040109.rm?",
+        "download": ""
+    },
+    {
+        "id": 21,
+        "eventId": 102,
+        "style": "groovy deep'n'progress",
+        "play": "http://195.210.0.134:554/ramgen/lora/archiv/20040206.rm?",
+        "download": ""
+    },
+    {
+        "id": 22,
+        "eventId": 109,
+        "style": "progressive",
+        "play": "http://195.210.0.134:554/ramgen/lora/archiv/20040305.rm?",
+        "download": ""
+    },
+    {
+        "id": 24,
+        "eventId": 126,
+        "style": "progressive-goa",
+        "play": "http://195.210.0.134:554/ramgen/lora/archiv/20040514.rm?",
+        "download": ""
+    },
+    {
+        "id": 25,
+        "eventId": 128,
+        "style": "Progressive-Tech House",
+        "play": "http://193.192.228.134:554/ramgen/lora/archiv/20040528.rm?start=00:00:00",
+        "download": ""
+    },
+    {
+        "id": 26,
+        "eventId": 162,
+        "style": "progressive",
+        "play": "http://193.192.228.134:554/ramgen/lora/archiv/20040709.rm?start=00:00:00",
+        "download": ""
+    },
+    {
+        "id": 40,
+        "eventId": 821,
+        "style": "5min hiphop 355min electro space",
+        "play": "http://193.192.228.134:554/ramgen/lora/archiv/20100715.rm?start=18:00:00",
+        "download": ""
+    },
+    {
+        "id": 39,
+        "eventId": 816,
+        "style": "elektronisch",
+        "play": "http://193.192.228.134:554/ramgen/lora/archiv/20100701.rm?start=18:00:00",
+        "download": ""
+    },
+    {
+        "id": 41,
+        "eventId": 826,
+        "style": "Progressive-House, Tech-House",
+        "play": "http://a1.soundcloud.com/images/player-overlay.png?ffb13b",
+        "download": ""
+    },
+    {
+        "id": 44,
+        "eventId": 992,
+        "style": "Housemusic",
+        "play": "https://soundcloud.com/jessejay/galaxy-space-night-indian",
+        "download": ""
+    }
+]
