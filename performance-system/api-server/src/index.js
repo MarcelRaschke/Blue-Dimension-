@@ -60,7 +60,7 @@ async function getIcecastStatus() {
     return { status: 'connected', url: ICECAST_URL };
   } catch (error) {
     logger.warn({ error: error.message }, 'Failed to connect to Icecast');
-    return { status: 'disconnected', error: error.message };
+    return { status: 'disconnected' };
   }
 }
 
@@ -89,7 +89,7 @@ app.get('/status', async (req, res) => {
     });
   } catch (error) {
     logger.error({ error }, 'Failed to get status');
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to get status' });
   }
 });
 
@@ -121,7 +121,7 @@ app.post('/metadata', async (req, res) => {
     });
   } catch (error) {
     logger.error({ error }, 'Failed to update metadata');
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to update metadata' });
   }
 });
 
@@ -131,7 +131,7 @@ app.get('/metadata', async (req, res) => {
     res.status(200).json(metadata || { track: 'N/A', artist: 'N/A' });
   } catch (error) {
     logger.error({ error }, 'Failed to get metadata');
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to get metadata' });
   }
 });
 
@@ -142,7 +142,7 @@ app.get('/history', async (req, res) => {
     res.status(200).json({ tracks: history, total: history.length });
   } catch (error) {
     logger.error({ error }, 'Failed to get track history');
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to get track history' });
   }
 });
 
@@ -153,7 +153,7 @@ app.get('/metrics', async (req, res) => {
     res.status(200).json({ metrics, total: metrics.length });
   } catch (error) {
     logger.error({ error }, 'Failed to get metrics');
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to get metrics' });
   }
 });
 
@@ -172,7 +172,7 @@ app.post('/metrics', async (req, res) => {
     res.status(201).json({ status: 'recorded', metric });
   } catch (error) {
     logger.error({ error }, 'Failed to record metric');
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to record metric' });
   }
 });
 
@@ -193,7 +193,7 @@ app.get('/analytics', async (req, res) => {
     });
   } catch (error) {
     logger.error({ error }, 'Failed to get analytics');
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to get analytics' });
   }
 });
 
@@ -216,7 +216,7 @@ app.post('/session/start', async (req, res) => {
     });
   } catch (error) {
     logger.error({ error }, 'Failed to start session');
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to start session' });
   }
 });
 
@@ -243,7 +243,7 @@ app.post('/session/end', async (req, res) => {
     });
   } catch (error) {
     logger.error({ error }, 'Failed to end session');
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to end session' });
   }
 });
 
