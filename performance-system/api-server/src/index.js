@@ -178,8 +178,11 @@ app.post('/metrics', async (req, res) => {
 
 app.get('/analytics', async (req, res) => {
   try {
-    const stats = await db.getSessionStats();
-    const recentMetrics = await db.getMetrics(24);
+    // Parallelize database queries for improved response time
+    const [stats, recentMetrics] = await Promise.all([
+      db.getSessionStats(),
+      db.getMetrics(24)
+    ]);
 
     res.status(200).json({
       stats,
