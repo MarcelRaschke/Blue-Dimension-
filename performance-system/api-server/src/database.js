@@ -171,12 +171,14 @@ export class Database {
   }
 
   async getMetrics(hours = 1) {
+    const validHours = Math.max(1, Math.min(24, parseInt(hours) || 1));
+    const cutoffTime = new Date(Date.now() - validHours * 3600 * 1000).toISOString();
     const query = `
       SELECT * FROM performance_metrics
-      WHERE timestamp > datetime('now', '-' || ? || ' hours')
+      WHERE timestamp > ?
       ORDER BY timestamp DESC
     `;
-    return this.all(query, [hours]);
+    return this.all(query, [cutoffTime]);
   }
 
   async logTrack(track, artist, duration) {

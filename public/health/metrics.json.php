@@ -37,13 +37,18 @@ $metrics['performance']['response_time_ms'] = round((microtime(true) - $startTim
 echo json_encode($metrics, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 
 /**
- * Get server uptime in seconds
+ * Get server uptime in seconds (approximate from boot time)
  */
 function getServerUptime() {
-    if (function_exists('sys_getloadavg')) {
-        // Approximate uptime from system load
-        $uptime = shell_exec('uptime -p 2>/dev/null');
-        return trim($uptime) ?: 'unknown';
+    if (file_exists('/proc/uptime')) {
+        $uptime = file_get_contents('/proc/uptime');
+        $uptimeSeconds = (int)explode(' ', trim($uptime))[0];
+
+        $days = floor($uptimeSeconds / 86400);
+        $hours = floor(($uptimeSeconds % 86400) / 3600);
+        $minutes = floor(($uptimeSeconds % 3600) / 60);
+
+        return "$days days, $hours hours, $minutes minutes";
     }
     return 'unknown';
 }
@@ -97,19 +102,21 @@ function getLastDeploymentTime() {
 }
 
 /**
- * Estimate deployment frequency (deployments per week)
+ * Estimate deployment frequency from deployment record file
  */
 function getDeploymentFrequency() {
     $projectRoot = dirname(dirname(dirname(__FILE__)));
-    $gitDir = $projectRoot . '/.git';
+    $deploymentRecord = $projectRoot . '/.github/deployment-record.json';
 
-    if (is_dir($gitDir)) {
-        // Get git log for last 7 days
-        $output = shell_exec("cd " . escapeshellarg($projectRoot) . " && git log --oneline --all --since='7 days ago' 2>/dev/null | wc -l");
-        $commitCount = (int)trim($output);
+    if (file_exists($deploymentRecord)) {
+        $content = file_get_contents($deploymentRecord);
+        $record = json_decode($content, true);
 
-        // Approximate: count commits to main branch merged in last week
-        return round($commitCount / 7, 2) . ' commits/day';
+        if (is_array($record) && !empty($record)) {
+            $count = count($record);
+            return round($count / 7, 2) . ' deployments/week';
+        }
     }
+
     return 'unknown';
 }

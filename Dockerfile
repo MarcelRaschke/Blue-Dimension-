@@ -17,13 +17,13 @@ RUN echo "Running PHP syntax validation..." && \
       -exec php -l {} \;
 
 # Stage 2: Runtime image
-FROM php:8.3-fpm-alpine
+FROM php:8.3-fpm-alpine AS runtime
 
 # Install production dependencies
 RUN apk add --no-cache \
     nginx \
-    redis-cli \
-    mysql-client \
+    redis \
+    mariadb-client \
     tzdata \
     curl
 

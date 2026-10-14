@@ -60,7 +60,7 @@ async function getIcecastStatus() {
     return { status: 'connected', url: ICECAST_URL };
   } catch (error) {
     logger.warn({ error: error.message }, 'Failed to connect to Icecast');
-    return { status: 'disconnected', error: error.message };
+    return { status: 'disconnected' };
   }
 }
 
@@ -89,7 +89,7 @@ app.get('/status', async (req, res) => {
     });
   } catch (error) {
     logger.error({ error }, 'Failed to get status');
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to get status' });
   }
 });
 
@@ -101,13 +101,17 @@ app.post('/metadata', async (req, res) => {
       return res.status(400).json({ error: 'track and artist are required' });
     }
 
+    const validatedBpm = bpm ? Math.max(0, parseInt(bpm) || null) : null;
+    const validatedDuration = duration ? Math.max(0, parseInt(duration) || null) : null;
+    const validatedPosition = Math.max(0, parseInt(position) || 0);
+
     await db.updateMetadata({
       track,
       artist,
-      bpm,
+      bpm: validatedBpm,
       key,
-      duration,
-      position: position || 0
+      duration: validatedDuration,
+      position: validatedPosition
     });
 
     if (track && artist) {
@@ -121,7 +125,7 @@ app.post('/metadata', async (req, res) => {
     });
   } catch (error) {
     logger.error({ error }, 'Failed to update metadata');
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to update metadata' });
   }
 });
 
@@ -131,7 +135,7 @@ app.get('/metadata', async (req, res) => {
     res.status(200).json(metadata || { track: 'N/A', artist: 'N/A' });
   } catch (error) {
     logger.error({ error }, 'Failed to get metadata');
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to get metadata' });
   }
 });
 
@@ -142,44 +146,53 @@ app.get('/history', async (req, res) => {
     res.status(200).json({ tracks: history, total: history.length });
   } catch (error) {
     logger.error({ error }, 'Failed to get track history');
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to get track history' });
   }
 });
 
 app.get('/metrics', async (req, res) => {
   try {
-    const hours = Math.min(parseInt(req.query.hours) || 1, 24);
+    const hours = Math.max(1, Math.min(parseInt(req.query.hours) || 1, 24));
     const metrics = await db.getMetrics(hours);
     res.status(200).json({ metrics, total: metrics.length });
   } catch (error) {
     logger.error({ error }, 'Failed to get metrics');
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to get metrics' });
   }
 });
 
 app.post('/metrics', async (req, res) => {
   try {
+    const cpuUsage = req.body.cpuUsage ? Math.max(0, Math.min(100, parseFloat(req.body.cpuUsage) || 0)) : null;
+    const memoryUsage = req.body.memoryUsage ? Math.max(0, parseInt(req.body.memoryUsage) || 0) : null;
+    const activeListeners = Math.max(0, parseInt(req.body.activeListeners) || 0);
+    const sampleRate = req.body.sampleRate ? Math.max(0, parseInt(req.body.sampleRate) || 0) : null;
+    const uptime = Math.max(0, parseInt(req.body.uptime) || 0);
+
     const metric = {
-      cpuUsage: req.body.cpuUsage,
-      memoryUsage: req.body.memoryUsage,
-      activeListeners: req.body.activeListeners,
+      cpuUsage,
+      memoryUsage,
+      activeListeners,
       bitrate: req.body.bitrate,
-      sampleRate: req.body.sampleRate,
-      uptime: req.body.uptime
+      sampleRate,
+      uptime
     };
 
     await db.recordMetric(metric);
     res.status(201).json({ status: 'recorded', metric });
   } catch (error) {
     logger.error({ error }, 'Failed to record metric');
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to record metric' });
   }
 });
 
 app.get('/analytics', async (req, res) => {
   try {
-    const stats = await db.getSessionStats();
-    const recentMetrics = await db.getMetrics(24);
+    // Parallelize database queries for improved response time
+    const [stats, recentMetrics] = await Promise.all([
+      db.getSessionStats(),
+      db.getMetrics(24)
+    ]);
 
     res.status(200).json({
       stats,
@@ -190,7 +203,7 @@ app.get('/analytics', async (req, res) => {
     });
   } catch (error) {
     logger.error({ error }, 'Failed to get analytics');
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to get analytics' });
   }
 });
 
@@ -213,7 +226,7 @@ app.post('/session/start', async (req, res) => {
     });
   } catch (error) {
     logger.error({ error }, 'Failed to start session');
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to start session' });
   }
 });
 
@@ -240,7 +253,7 @@ app.post('/session/end', async (req, res) => {
     });
   } catch (error) {
     logger.error({ error }, 'Failed to end session');
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: 'Failed to end session' });
   }
 });
 
