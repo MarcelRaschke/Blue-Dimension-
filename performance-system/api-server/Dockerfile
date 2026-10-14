@@ -1,16 +1,29 @@
-FROM node:18-bullseye
+# Build stage: Compile and prepare dependencies
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-  curl \
+# Only install build dependencies in builder stage
+RUN apk add --no-cache \
   python3 \
   make \
   g++ \
-  && rm -rf /var/lib/apt/lists/*
+  curl
 
 COPY package*.json ./
 RUN npm ci --only=production
+
+# Runtime stage: Minimal production image
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Only install runtime dependencies (curl for healthcheck)
+RUN apk add --no-cache curl
+
+# Copy production dependencies and source from builder
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
 
 COPY src ./src
 
