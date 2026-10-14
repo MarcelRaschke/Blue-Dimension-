@@ -101,13 +101,17 @@ app.post('/metadata', async (req, res) => {
       return res.status(400).json({ error: 'track and artist are required' });
     }
 
+    const validatedBpm = bpm ? Math.max(0, parseInt(bpm) || null) : null;
+    const validatedDuration = duration ? Math.max(0, parseInt(duration) || null) : null;
+    const validatedPosition = Math.max(0, parseInt(position) || 0);
+
     await db.updateMetadata({
       track,
       artist,
-      bpm,
+      bpm: validatedBpm,
       key,
-      duration,
-      position: position || 0
+      duration: validatedDuration,
+      position: validatedPosition
     });
 
     if (track && artist) {
@@ -148,7 +152,7 @@ app.get('/history', async (req, res) => {
 
 app.get('/metrics', async (req, res) => {
   try {
-    const hours = Math.min(parseInt(req.query.hours) || 1, 24);
+    const hours = Math.max(1, Math.min(parseInt(req.query.hours) || 1, 24));
     const metrics = await db.getMetrics(hours);
     res.status(200).json({ metrics, total: metrics.length });
   } catch (error) {
@@ -159,13 +163,19 @@ app.get('/metrics', async (req, res) => {
 
 app.post('/metrics', async (req, res) => {
   try {
+    const cpuUsage = req.body.cpuUsage ? Math.max(0, Math.min(100, parseFloat(req.body.cpuUsage) || 0)) : null;
+    const memoryUsage = req.body.memoryUsage ? Math.max(0, parseInt(req.body.memoryUsage) || 0) : null;
+    const activeListeners = Math.max(0, parseInt(req.body.activeListeners) || 0);
+    const sampleRate = req.body.sampleRate ? Math.max(0, parseInt(req.body.sampleRate) || 0) : null;
+    const uptime = Math.max(0, parseInt(req.body.uptime) || 0);
+
     const metric = {
-      cpuUsage: req.body.cpuUsage,
-      memoryUsage: req.body.memoryUsage,
-      activeListeners: req.body.activeListeners,
+      cpuUsage,
+      memoryUsage,
+      activeListeners,
       bitrate: req.body.bitrate,
-      sampleRate: req.body.sampleRate,
-      uptime: req.body.uptime
+      sampleRate,
+      uptime
     };
 
     await db.recordMetric(metric);
