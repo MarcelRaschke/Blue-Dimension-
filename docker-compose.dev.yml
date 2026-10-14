@@ -33,7 +33,7 @@ services:
     networks:
       - blue-dimension-dev
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/ping"]
+      test: ["CMD", "php-fpm", "-v"]
       interval: 30s
       timeout: 10s
       retries: 3
