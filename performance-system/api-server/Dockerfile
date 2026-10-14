@@ -14,7 +14,7 @@ COPY package*.json ./
 RUN npm ci --only=production
 
 # Runtime stage: Minimal production image
-FROM node:18-alpine
+FROM node:18-alpine AS runtime
 
 WORKDIR /app
 
