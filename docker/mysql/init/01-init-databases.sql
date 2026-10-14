@@ -23,7 +23,8 @@ CREATE TABLE IF NOT EXISTS guestbook (
   timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
   ip_address VARCHAR(45),
   status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
-  INDEX (timestamp)
+  INDEX (timestamp),
+  INDEX (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Create links table
@@ -83,7 +84,9 @@ CREATE TABLE IF NOT EXISTS soundTable (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX (created_at),
-  INDEX (artist)
+  INDEX (artist),
+  INDEX (album),
+  INDEX (artist, album)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Create application user for Docker
