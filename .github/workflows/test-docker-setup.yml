@@ -57,6 +57,9 @@ jobs:
           DB_PASSWORD: app_password
           MYSQL_ROOT_PASSWORD: root_password
           MYSQL_PASSWORD: app_password
+          ICECAST_SOURCE_PASSWORD: source_password
+          ICECAST_RELAY_PASSWORD: relay_password
+          ICECAST_ADMIN_PASSWORD: admin_password
         run: |
           docker-compose -f docker-compose.dev.yml up -d --build
           echo "Waiting for services to be healthy..."
@@ -78,6 +81,8 @@ jobs:
       - name: Check service health
         env:
           MYSQL_PASSWORD: app_password
+          ICECAST_SOURCE_PASSWORD: source_password
+          ICECAST_ADMIN_PASSWORD: admin_password
         run: |
           echo "=== Checking Services ==="
           docker-compose -f docker-compose.dev.yml ps
