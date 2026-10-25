@@ -84,7 +84,7 @@ services:
     networks:
       - blue-dimension-dev
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "app", "-p${MYSQL_PASSWORD:-app_password}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--silent"]
       interval: 30s
       timeout: 10s
       retries: 3
