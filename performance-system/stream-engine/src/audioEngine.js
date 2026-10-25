@@ -23,7 +23,11 @@ export class AudioEngine {
         const icecastHost = process.env.ICECAST_HOST || 'icecast';
         const icecastPort = process.env.ICECAST_PORT || '8000';
         const mountPoint = parsedIcecastUrl.pathname || '/blue-dimension';
-        const password = parsedIcecastUrl.password || 'changeme';
+        const password = parsedIcecastUrl.password || process.env.ICECAST_SOURCE_PASSWORD;
+
+        if (!password) {
+          throw new Error('ICECAST_SOURCE_PASSWORD must be set in environment or provided in connection URL');
+        }
 
         const audioDeviceMatch = this.config.audioInput.match(/^hw:(\d+)(?::(\d+))?$/);
         if (!audioDeviceMatch) {
