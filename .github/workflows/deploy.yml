@@ -126,8 +126,9 @@ jobs:
       - name: Send Slack notification - success
         if: success()
         uses: slackapi/slack-github-action@v1
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
           payload: |
             {
               "text": "✅ Deployment successful to production",
@@ -146,8 +147,9 @@ jobs:
       - name: Send Slack notification - failure with rollback
         if: failure() && steps.verify.outcome == 'failure'
         uses: slackapi/slack-github-action@v1
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
           payload: |
             {
               "text": "❌ Deployment failed and rolled back",
@@ -166,8 +168,9 @@ jobs:
       - name: Send Slack notification - deployment error
         if: failure() && steps.deploy.outcome == 'failure'
         uses: slackapi/slack-github-action@v1
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
         with:
-          webhook-url: ${{ secrets.SLACK_WEBHOOK }}
           payload: |
             {
               "text": "⚠️ Deployment error - SFTP upload failed",
