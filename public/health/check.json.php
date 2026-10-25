@@ -61,6 +61,3 @@ function checkCriticalFiles() {
 
     return true;
 }
-
-    return $result;
-}
