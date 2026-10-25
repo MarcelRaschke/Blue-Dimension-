@@ -2,8 +2,12 @@ import axios from 'axios';
 
 const icecastHost = process.env.ICECAST_HOST || 'icecast';
 const icecastPort = process.env.ICECAST_PORT || '8000';
-const icecastAdminPassword = process.env.ICECAST_ADMIN_PASSWORD || 'changeme';
+const icecastAdminPassword = process.env.ICECAST_ADMIN_PASSWORD;
 const mountPoint = '/blue-dimension';
+
+if (!icecastAdminPassword) {
+  throw new Error('ICECAST_ADMIN_PASSWORD must be set in environment variables');
+}
 
 const icecastClient = axios.create({
   baseURL: `http://${icecastHost}:${icecastPort}`,
