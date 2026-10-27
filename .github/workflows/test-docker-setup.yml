@@ -51,13 +51,13 @@ jobs:
           ICECAST_RELAY_PASSWORD: relay_password
           ICECAST_ADMIN_PASSWORD: admin_password
         run: |
-          docker-compose -f docker-compose.dev.yml up -d --build
+          docker compose -f docker-compose.dev.yml up -d --build
           echo "Waiting for services to be healthy..."
           sleep 5
 
           # Wait for database to be ready
           for i in {1..30}; do
-            if docker-compose -f docker-compose.dev.yml exec -T db mysqladmin ping -u app -p${MYSQL_PASSWORD} 2>/dev/null; then
+            if docker compose -f docker-compose.dev.yml exec -T db mysqladmin ping -u app -p${MYSQL_PASSWORD} 2>/dev/null; then
               echo "Database is ready"
               break
             fi
@@ -75,19 +75,19 @@ jobs:
           ICECAST_ADMIN_PASSWORD: admin_password
         run: |
           echo "=== Checking Services ==="
-          docker-compose -f docker-compose.dev.yml ps
+          docker compose -f docker-compose.dev.yml ps
 
           echo -e "\n=== Checking App Service ==="
           echo "Skipped: no app container, the site is static"
 
           echo -e "\n=== Checking Web Service ==="
-          docker-compose -f docker-compose.dev.yml exec -T web curl -s -f -o /dev/null -w "HTTP %{http_code}\n" http://localhost/ || echo "Web service health check pending"
+          docker compose -f docker-compose.dev.yml exec -T web curl -s -f -o /dev/null -w "HTTP %{http_code}\n" http://localhost/ || echo "Web service health check pending"
 
           echo -e "\n=== Checking Database Service ==="
-          docker-compose -f docker-compose.dev.yml exec -T db mysqladmin ping -u app -p${MYSQL_PASSWORD} || echo "Database health check in progress"
+          docker compose -f docker-compose.dev.yml exec -T db mysqladmin ping -u app -p${MYSQL_PASSWORD} || echo "Database health check in progress"
 
           echo -e "\n=== Checking Redis Service ==="
-          docker-compose -f docker-compose.dev.yml exec -T cache redis-cli ping || echo "Redis health check pending"
+          docker compose -f docker-compose.dev.yml exec -T cache redis-cli ping || echo "Redis health check pending"
 
       - name: Verify network connectivity
         run: |
@@ -100,13 +100,13 @@ jobs:
           MYSQL_PASSWORD: app_password
         run: |
           echo "=== Verifying Database Schema ==="
-          docker-compose -f docker-compose.dev.yml exec -T db mysql -u app -p${MYSQL_PASSWORD} jessejay -e "SHOW TABLES;" || true
+          docker compose -f docker-compose.dev.yml exec -T db mysql -u app -p${MYSQL_PASSWORD} jessejay -e "SHOW TABLES;" || true
 
       - name: Check volume mounts
         run: |
           echo "=== Checking Volume Mounts ==="
           echo "Skipped: no app container, the site is static"
-          docker-compose -f docker-compose.dev.yml exec -T web ls -la /var/www/html/public/ | head -20
+          docker compose -f docker-compose.dev.yml exec -T web ls -la /var/www/html/public/ | head -20
 
       - name: View service logs
         if: always()
@@ -115,15 +115,15 @@ jobs:
           echo "Skipped: no app container, the site is static"
 
           echo -e "\n=== Web Server Logs ==="
-          docker-compose -f docker-compose.dev.yml logs web | tail -30
+          docker compose -f docker-compose.dev.yml logs web | tail -30
 
           echo -e "\n=== Database Logs ==="
-          docker-compose -f docker-compose.dev.yml logs db | tail -20
+          docker compose -f docker-compose.dev.yml logs db | tail -20
 
       - name: Cleanup
         if: always()
         run: |
-          docker-compose -f docker-compose.dev.yml down -v
+          docker compose -f docker-compose.dev.yml down -v
 
       - name: Report test results
         run: |
