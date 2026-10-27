@@ -13,6 +13,7 @@ render_page('Biografie', 'biography.php', static function () use ($biography, $l
         <a href="biography.php?lang=de"<?= $lang === 'de' ? ' aria-current="true"' : '' ?>>Deutsch</a>
         <a href="biography.php?lang=en"<?= $lang === 'en' ? ' aria-current="true"' : '' ?>>English</a>
     </nav>
+    <?= figure_tag('dj-controller', 'DJ Jesse Jay, 3D-Darstellung') ?>
     <article class="prose">
         <?= sanitize_html(str_replace('%09', "\t", $biography[$lang])) ?>
     </article>

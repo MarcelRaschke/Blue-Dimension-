@@ -31,11 +31,15 @@ a:focus-visible { outline: 2px solid var(--neon-pink); outline-offset: 2px; }
 }
 
 .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
     color: var(--neon-pink);
     font-weight: 700;
     text-decoration: none;
     letter-spacing: 0.04em;
 }
+.brand-logo { width: 32px; height: 32px; border-radius: 50%; }
 
 .site-nav { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; }
 .site-nav a { text-decoration: none; }
@@ -88,6 +92,26 @@ h1 { color: var(--neon-pink); }
 .link-list { padding-left: 1.2rem; }
 
 .prose { overflow-wrap: anywhere; }
+
+figure.art { margin: 0 0 1.5rem; }
+figure.art img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+    box-shadow: 0 0 24px rgba(46, 242, 255, 0.18);
+}
+figure.art figcaption { margin-top: 0.4rem; font-size: 0.9rem; color: var(--muted); }
+
+.hero figure.art { margin: 2rem 0 0; }
+
+.art-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 2rem;
+}
+.art-grid figure.art { margin: 0; }
 
 @media (max-width: 480px) {
     .site-header { flex-direction: column; align-items: flex-start; }

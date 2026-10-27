@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/config.php';
 require __DIR__ . '/html.php';
+require __DIR__ . '/images.php';
 require __DIR__ . '/layout.php';
 
 const CONTENT_DIR = __DIR__ . '/../content';

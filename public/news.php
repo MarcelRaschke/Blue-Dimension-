@@ -8,6 +8,7 @@ $news = load_content('news');
 
 render_page('News', 'news.php', static function () use ($news): void { ?>
     <h1>News</h1>
+    <?= figure_tag('radio-lora-97-5', 'Radio LoRa 97.5, Sendeplatz von Blue Dimension') ?>
     <?php foreach ($news as $item): ?>
         <article class="card">
             <p><?= sanitize_html($item['text']) ?></p>

@@ -11,6 +11,7 @@ render_page('', 'index.php', static function () use ($news): void { ?>
         <h1><?= h(SITE_NAME) ?></h1>
         <p class="tagline"><?= h(SITE_TAGLINE) ?></p>
         <p>Radio LoRa, Donnerstag 00:00–06:00: Blue Dimension und Galaxy Space Night.</p>
+        <?= figure_tag('hero-wordmark', '', true) ?>
     </section>
 
     <section>

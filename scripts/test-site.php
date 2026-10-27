@@ -96,5 +96,39 @@ $gbookHtml = (string) ob_get_clean();
 check('gbook output contains no mailto', !str_contains($gbookHtml, 'mailto:'));
 check('gbook output escapes markup', !str_contains($gbookHtml, '<script'));
 
+// 5. Images: manifest matches the files, budget holds, every image is used.
+$imageDir = __DIR__ . '/../public/assets/img';
+$imageBudgetBytes = 300 * 1024;
+$pageSources = '';
+foreach (array_merge(glob(__DIR__ . '/../public/*.php'), glob(__DIR__ . '/../app/*.php')) as $sourceFile) {
+    $pageSources .= file_get_contents($sourceFile);
+}
+
+$onDisk = array_map(static fn(string $f): string => basename($f, '.webp'), glob($imageDir . '/*.webp') ?: []);
+foreach (array_diff($onDisk, array_keys(IMAGES)) as $orphan) {
+    check("image file $orphan.webp is in the manifest", false, 'not listed in app/images.php');
+}
+
+foreach (IMAGES as $key => $image) {
+    $path = $imageDir . '/' . $key . '.webp';
+    $size = is_file($path) ? (int) filesize($path) : 0;
+    check("image $key exists", $size > 0);
+    if ($size === 0) {
+        continue;
+    }
+    check("image $key within size budget", $size <= $imageBudgetBytes, $size . ' bytes');
+
+    $info = getimagesize($path);
+    $dimensionsOk = $info !== false && $info[0] === $image['width'] && $info[1] === $image['height'];
+    check("image $key dimensions match manifest", $dimensionsOk, $info ? "$info[0]x$info[1]" : 'unreadable');
+
+    check("image $key has alt text", trim($image['alt']) !== '');
+    check("image $key is used by a page", str_contains($pageSources, "'$key'"));
+}
+
+check('favicon.ico is served from the docroot', is_file(__DIR__ . '/../public/favicon.ico') && filesize(__DIR__ . '/../public/favicon.ico') > 0);
+check('apple-touch-icon exists', is_file($imageDir . '/apple-touch-icon.png'));
+check('og:image is an absolute URL', preg_match('#^https?://[^/]+/assets/img/#', SITE_URL . image_url(OG_IMAGE_KEY)) === 1, SITE_URL);
+
 printf("\n%d checks, %d failed\n", $checks, $failures);
 exit($failures === 0 ? 0 : 1);
