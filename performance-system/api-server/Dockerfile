@@ -27,6 +27,10 @@ COPY --from=builder /app/package*.json ./
 
 COPY src ./src
 
+RUN mkdir -p /app/data && chown -R node:node /app/data
+
+USER node
+
 EXPOSE 5000
 
 ENV NODE_ENV=production

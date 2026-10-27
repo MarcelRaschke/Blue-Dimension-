@@ -20,6 +20,10 @@ WORKDIR /app
 
 COPY --from=builder /app/osc-bridge .
 
+RUN useradd --system --no-create-home --shell /usr/sbin/nologin app
+
+USER app
+
 ENV CDJ_OSC_PORT=7700
 ENV ABLETON_OSC_ADDR=host.docker.internal:11000
 ENV LOG_LEVEL=info

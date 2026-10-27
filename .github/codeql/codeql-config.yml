@@ -1,0 +1,6 @@
+name: "Blue Dimension CodeQL config"
+
+# Archivierte Wayback-Kopien sind keine lauffähigen Quellen und enthalten
+# Dateien, die CodeQL nicht parsen kann.
+paths-ignore:
+  - docs/archive
