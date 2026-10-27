@@ -1,9 +1,9 @@
 ---
-name: Feature request
+name: 'Feature request sponsoring '
 about: Suggest an idea for this project
-title: ''
+title: Buymeacoffe
 labels: ''
-assignees: ''
+assignees: MarcelRaschke
 
 ---
 
