@@ -6,11 +6,12 @@ require_once __DIR__ . '/../app/bootstrap.php';
 
 $news = array_slice(load_content('news'), 0, 3);
 
-render_page('', 'index.php', static function () use ($news): void { ?>
+render_page('', 'index.html', static function () use ($news): void { ?>
     <section class="hero">
         <h1><?= h(SITE_NAME) ?></h1>
         <p class="tagline"><?= h(SITE_TAGLINE) ?></p>
         <p>Radio LoRa, Donnerstag 00:00–06:00: Blue Dimension und Galaxy Space Night.</p>
+        <?= figure_tag('hero-wordmark', '', true) ?>
     </section>
 
     <section>
@@ -20,6 +21,6 @@ render_page('', 'index.php', static function () use ($news): void { ?>
                 <p><?= sanitize_html($item['text']) ?></p>
             </article>
         <?php endforeach; ?>
-        <p><a href="news.php">Alle News</a></p>
+        <p><a href="news.html">Alle News</a></p>
     </section>
 <?php });

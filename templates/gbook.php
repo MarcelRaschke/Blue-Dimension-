@@ -6,7 +6,7 @@ require_once __DIR__ . '/../app/bootstrap.php';
 
 $entries = load_content('guestbook');
 
-render_page('Gästebuch', 'gbook.php', static function () use ($entries): void { ?>
+render_page('Gästebuch', 'gbook.html', static function () use ($entries): void { ?>
     <h1>Gästebuch</h1>
     <p class="muted"><?= count($entries) ?> Einträge aus dem Archiv.</p>
     <?php foreach ($entries as $entry): ?>

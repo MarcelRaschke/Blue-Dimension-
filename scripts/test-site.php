@@ -78,7 +78,7 @@ foreach ($pages as $page => $_) {
     parse_str($query, $_GET);
     ob_start();
     try {
-        require __DIR__ . '/../public/' . $file;
+        require __DIR__ . '/../templates/' . $file;
         $html = (string) ob_get_clean();
         check("page $page renders", strlen($html) > 500 && str_contains($html, '<html lang="de">'));
     } catch (Throwable $e) {
@@ -91,10 +91,73 @@ foreach ($pages as $page => $_) {
 // 4. Guestbook output never contains addresses, and user text is escaped.
 ob_start();
 $_GET = [];
-require __DIR__ . '/../public/gbook.php';
+require __DIR__ . '/../templates/gbook.php';
 $gbookHtml = (string) ob_get_clean();
 check('gbook output contains no mailto', !str_contains($gbookHtml, 'mailto:'));
 check('gbook output escapes markup', !str_contains($gbookHtml, '<script'));
+
+// 5. Images: manifest matches the files, budget holds, every image is used.
+$imageDir = __DIR__ . '/../public/assets/img';
+$imageBudgetBytes = 300 * 1024;
+$pageSources = '';
+foreach (array_merge(glob(__DIR__ . '/../templates/*.php'), glob(__DIR__ . '/../app/*.php')) as $sourceFile) {
+    $pageSources .= file_get_contents($sourceFile);
+}
+
+$onDisk = array_map(static fn(string $f): string => basename($f, '.webp'), glob($imageDir . '/*.webp') ?: []);
+foreach (array_diff($onDisk, array_keys(IMAGES)) as $orphan) {
+    check("image file $orphan.webp is in the manifest", false, 'not listed in app/images.php');
+}
+
+foreach (IMAGES as $key => $image) {
+    $path = $imageDir . '/' . $key . '.webp';
+    $size = is_file($path) ? (int) filesize($path) : 0;
+    check("image $key exists", $size > 0);
+    if ($size === 0) {
+        continue;
+    }
+    check("image $key within size budget", $size <= $imageBudgetBytes, $size . ' bytes');
+
+    $info = getimagesize($path);
+    $dimensionsOk = $info !== false && $info[0] === $image['width'] && $info[1] === $image['height'];
+    check("image $key dimensions match manifest", $dimensionsOk, $info ? "$info[0]x$info[1]" : 'unreadable');
+
+    check("image $key has alt text", trim($image['alt']) !== '');
+    check("image $key is used by a page", str_contains($pageSources, "'$key'"));
+}
+
+check('favicon.ico is served from the docroot', is_file(__DIR__ . '/../public/favicon.ico') && filesize(__DIR__ . '/../public/favicon.ico') > 0);
+check('apple-touch-icon exists', is_file($imageDir . '/apple-touch-icon.png'));
+foreach ([32, 192] as $iconSize) {
+    check("favicon-$iconSize.png exists", is_file($imageDir . "/favicon-$iconSize.png"));
+}
+check('layout links the PNG favicons', str_contains(file_get_contents(__DIR__ . '/../app/layout.php'), 'favicon-32.png'));
+check('og:image is an absolute URL', preg_match('#^https?://[^/]+/assets/img/#', SITE_URL . image_url(OG_IMAGE_KEY)) === 1, SITE_URL);
+
+// 6. Static output: the docroot holds no PHP, and committed HTML matches the templates.
+check('docroot contains no PHP files', glob(__DIR__ . '/../public/**/*.php') === [] && glob(__DIR__ . '/../public/*.php') === []);
+
+$staticPages = [
+    'index.html' => ['index.php', []],
+    'news.html' => ['news.php', []],
+    'events.html' => ['events.php', []],
+    'music.html' => ['music.php', []],
+    'gallery.html' => ['gallery.php', []],
+    'links.html' => ['links.php', []],
+    'gbook.html' => ['gbook.php', []],
+    'biography.html' => ['biography.php', ['lang' => 'de']],
+    'biography-en.html' => ['biography.php', ['lang' => 'en']],
+];
+foreach ($staticPages as $output => [$template, $query]) {
+    $_GET = $query;
+    ob_start();
+    require __DIR__ . '/../templates/' . $template;
+    $rendered = (string) ob_get_clean();
+    $committed = @file_get_contents(__DIR__ . '/../public/' . $output);
+    check("public/$output matches templates/$template", $committed === $rendered, 'run php scripts/render-static.php');
+    check("public/$output has no PHP links", !str_contains($rendered, '.php'));
+}
+$_GET = [];
 
 printf("\n%d checks, %d failed\n", $checks, $failures);
 exit($failures === 0 ? 0 : 1);

@@ -10,8 +10,8 @@ DEPLOY_URL="${1:-https://djjessejay.ch}"
 MAX_RETRIES=5
 RETRY_DELAY=1  # seconds - faster retry with optimized health endpoints (<50ms target)
 TIMEOUT=10
-HEALTH_ENDPOINT="${DEPLOY_URL}/health.php"
-DETAILED_ENDPOINT="${DEPLOY_URL}/public/health/check.json.php"
+HEALTH_ENDPOINT="${DEPLOY_URL}/"
+DETAILED_ENDPOINT="${DEPLOY_URL}/news.html"
 
 echo "Starting post-deployment verification..."
 echo "Target: $DEPLOY_URL"

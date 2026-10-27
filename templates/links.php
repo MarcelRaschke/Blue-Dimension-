@@ -6,7 +6,7 @@ require_once __DIR__ . '/../app/bootstrap.php';
 
 $links = load_content('links');
 
-render_page('Links', 'links.php', static function () use ($links): void { ?>
+render_page('Links', 'links.html', static function () use ($links): void { ?>
     <h1>Links</h1>
     <ul class="link-list">
         <?php foreach ($links as $link): ?>
