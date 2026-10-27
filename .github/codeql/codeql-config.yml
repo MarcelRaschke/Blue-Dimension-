@@ -1,6 +1,23 @@
 name: "Blue Dimension CodeQL config"
 
-# Archivierte Wayback-Kopien sind keine lauffähigen Quellen und enthalten
-# Dateien, die CodeQL nicht parsen kann.
+# security-and-quality übernimmt die Suite der bisherigen CodeQL-Job-Variante
+# aus security.yml, damit beim Zusammenlegen keine Abdeckung verloren geht.
+queries:
+  - uses: security-and-quality
+
+# Gilt für interpretierte Sprachen (JS/TS, Python, Actions).
+# Go wird über den Build in performance-system/osc-bridge erfasst.
+paths:
+  - performance-system
+  - public
+  - scripts
+  - .github/workflows
+
 paths-ignore:
+  # Archivierte Wayback-Kopien sind keine lauffähigen Quellen und enthalten
+  # Dateien, die CodeQL nicht parsen kann.
   - docs/archive
+  - "**/node_modules/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/*.min.js"
