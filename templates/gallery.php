@@ -6,7 +6,7 @@ require_once __DIR__ . '/../app/bootstrap.php';
 
 $events = load_content('events');
 
-render_page('Galerie', 'gallery.php', static function () use ($events): void { ?>
+render_page('Galerie', 'gallery.html', static function () use ($events): void { ?>
     <h1>Galerie</h1>
     <section id="artwork">
         <h2>Artwork</h2>

@@ -78,7 +78,7 @@ foreach ($pages as $page => $_) {
     parse_str($query, $_GET);
     ob_start();
     try {
-        require __DIR__ . '/../public/' . $file;
+        require __DIR__ . '/../templates/' . $file;
         $html = (string) ob_get_clean();
         check("page $page renders", strlen($html) > 500 && str_contains($html, '<html lang="de">'));
     } catch (Throwable $e) {
@@ -91,7 +91,7 @@ foreach ($pages as $page => $_) {
 // 4. Guestbook output never contains addresses, and user text is escaped.
 ob_start();
 $_GET = [];
-require __DIR__ . '/../public/gbook.php';
+require __DIR__ . '/../templates/gbook.php';
 $gbookHtml = (string) ob_get_clean();
 check('gbook output contains no mailto', !str_contains($gbookHtml, 'mailto:'));
 check('gbook output escapes markup', !str_contains($gbookHtml, '<script'));
@@ -100,7 +100,7 @@ check('gbook output escapes markup', !str_contains($gbookHtml, '<script'));
 $imageDir = __DIR__ . '/../public/assets/img';
 $imageBudgetBytes = 300 * 1024;
 $pageSources = '';
-foreach (array_merge(glob(__DIR__ . '/../public/*.php'), glob(__DIR__ . '/../app/*.php')) as $sourceFile) {
+foreach (array_merge(glob(__DIR__ . '/../templates/*.php'), glob(__DIR__ . '/../app/*.php')) as $sourceFile) {
     $pageSources .= file_get_contents($sourceFile);
 }
 
@@ -133,6 +133,31 @@ foreach ([32, 192] as $iconSize) {
 }
 check('layout links the PNG favicons', str_contains(file_get_contents(__DIR__ . '/../app/layout.php'), 'favicon-32.png'));
 check('og:image is an absolute URL', preg_match('#^https?://[^/]+/assets/img/#', SITE_URL . image_url(OG_IMAGE_KEY)) === 1, SITE_URL);
+
+// 6. Static output: the docroot holds no PHP, and committed HTML matches the templates.
+check('docroot contains no PHP files', glob(__DIR__ . '/../public/**/*.php') === [] && glob(__DIR__ . '/../public/*.php') === []);
+
+$staticPages = [
+    'index.html' => ['index.php', []],
+    'news.html' => ['news.php', []],
+    'events.html' => ['events.php', []],
+    'music.html' => ['music.php', []],
+    'gallery.html' => ['gallery.php', []],
+    'links.html' => ['links.php', []],
+    'gbook.html' => ['gbook.php', []],
+    'biography.html' => ['biography.php', ['lang' => 'de']],
+    'biography-en.html' => ['biography.php', ['lang' => 'en']],
+];
+foreach ($staticPages as $output => [$template, $query]) {
+    $_GET = $query;
+    ob_start();
+    require __DIR__ . '/../templates/' . $template;
+    $rendered = (string) ob_get_clean();
+    $committed = @file_get_contents(__DIR__ . '/../public/' . $output);
+    check("public/$output matches templates/$template", $committed === $rendered, 'run php scripts/render-static.php');
+    check("public/$output has no PHP links", !str_contains($rendered, '.php'));
+}
+$_GET = [];
 
 printf("\n%d checks, %d failed\n", $checks, $failures);
 exit($failures === 0 ? 0 : 1);

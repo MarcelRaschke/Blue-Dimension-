@@ -68,7 +68,7 @@ timeout $RESTORE_TIMEOUT ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no \
     tar -xzf ${LATEST_BACKUP} -C /home/${DEPLOY_USER}/public_html/
 
     # Verify restoration
-    if [ -f /home/${DEPLOY_USER}/public_html/health.php ]; then
+    if [ -f /home/${DEPLOY_USER}/public_html/public/index.html ]; then
         echo "✓ Restoration successful"
         echo "Broken deployment backed up to: ${BACKUP_BROKEN_DIR}"
         exit 0

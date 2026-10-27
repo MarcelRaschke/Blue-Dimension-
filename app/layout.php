@@ -6,14 +6,14 @@
 declare(strict_types=1);
 
 const NAV_ITEMS = [
-    'index.php' => 'Start',
-    'biography.php' => 'Biografie',
-    'news.php' => 'News',
-    'events.php' => 'Events',
-    'music.php' => 'Musik',
-    'gallery.php' => 'Galerie',
-    'links.php' => 'Links',
-    'gbook.php' => 'Gästebuch',
+    'index.html' => 'Start',
+    'biography.html' => 'Biografie',
+    'news.html' => 'News',
+    'events.html' => 'Events',
+    'music.html' => 'Musik',
+    'gallery.html' => 'Galerie',
+    'links.html' => 'Links',
+    'gbook.html' => 'Gästebuch',
 ];
 
 /**
@@ -45,7 +45,7 @@ function render_page(string $title, string $activeFile, callable $body): void
 </head>
 <body>
 <header class="site-header">
-    <a class="brand" href="index.php"><?= image_tag('logo-badge', 'brand-logo', true, '') ?><span><?= h(SITE_NAME) ?></span></a>
+    <a class="brand" href="index.html"><?= image_tag('logo-badge', 'brand-logo', true, '') ?><span><?= h(SITE_NAME) ?></span></a>
     <nav class="site-nav" aria-label="Hauptnavigation">
         <?php foreach (NAV_ITEMS as $file => $label): ?>
             <a href="<?= h($file) ?>"<?= $file === $activeFile ? ' aria-current="page"' : '' ?>><?= h($label) ?></a>

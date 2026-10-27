@@ -8,7 +8,7 @@ Die Website ist eine PHP-Anwendung mit Docroot `public/`, Inhalten aus `content/
 
 Befunde vor der Umsetzung:
 
-1. Die Galerie zeigt 30 Event-Fotos über `GALLERY_BASE_URL` (Standard `/media/gallery`). Diese Dateien sind nicht im Repository. Alle Galerie-Bilder sind daher defekt. Das ist vorbestehend und nicht Teil dieser Änderung.
+1. Die Galerie zeigt 25 Event-Fotos über `GALLERY_BASE_URL` (Standard `/media/gallery`). Diese Dateien sind nicht im Repository. Alle Event-Fotos der Galerie sind daher defekt, die neuen Artwork-Bilder nicht. Das ist vorbestehend und nicht Teil dieser Änderung.
 2. `favicon.ico` lag im Repository-Root und war 0 Byte groß. Der Docroot ist `public/`, das Icon wurde also nie ausgeliefert.
 3. Es gab keine Open-Graph-Metadaten. Links auf die Website zeigten in Vorschauen kein Bild.
 4. Die Dateien `DJPult.gif`, `RadioStudio.mov` und `JesseJayBanner.mov` liegen im Root und sind nicht öffentlich erreichbar.
@@ -69,7 +69,7 @@ Die Umsetzung besteht aus diesen Teilen:
 | Build | `scripts/build-images.py` | Originale zu WebP skalieren, zuschneiden, Favicon erzeugen |
 | Katalog | `app/images.php` | Manifest mit Maßen und Alt-Texten, Helfer `image_tag()`, `figure_tag()`, `image_url()` |
 | Layout | `app/layout.php` | Favicon-Links, Open-Graph-Tags, Logo im Header |
-| Seiten | `public/index.php`, `news.php`, `events.php`, `biography.php`, `music.php`, `gallery.php` | Bilder einbinden |
+| Seiten | `templates/index.php`, `news.php`, `events.php`, `biography.php`, `music.php`, `gallery.php` | Bilder einbinden, danach `php scripts/render-static.php` |
 | Stil | `public/assets/site.css` | Bildrahmen, Bildunterschriften, Artwork-Raster |
 | Tests | `scripts/test-site.php` | Prüfungen für Katalog, Dateien, Größen, Verwendung |
 
@@ -117,7 +117,7 @@ Nginx liefert `/assets/` mit `Cache-Control: public, immutable` und 30 Tagen Gü
 1. Name der Reihe: Die Startseite und die Musikseite nennen „Galaxy Space Night“, das Poster heißt „Cy8er Space Night“. Die Entscheidung liegt beim Betreiber.
 2. djjjcoin (Nr. 8): Veröffentlichen oder nicht, nach rechtlicher Prüfung.
 3. Herkunft und Rechte: Mehrere Motive tragen Gemini-Wasserzeichen oder sind KI-gestützt erstellt. Die Nutzungsrechte und eine etwaige Kennzeichnung sollten bestätigt werden.
-4. Galerie-Fotos: Die 30 Event-Fotos fehlen auf dem Server. Lösung: Dateien unter `GALLERY_BASE_URL` bereitstellen oder den Pfad korrigieren.
+4. Galerie-Fotos: Die 25 Event-Fotos fehlen auf dem Server. Lösung: Dateien unter `GALLERY_BASE_URL` bereitstellen oder den Pfad korrigieren.
 
 ## Nebenbefunde
 
