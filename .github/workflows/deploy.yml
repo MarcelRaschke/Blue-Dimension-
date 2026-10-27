@@ -37,7 +37,7 @@ jobs:
 
       - name: Create deployment
         id: create_deployment
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const deployment = await github.rest.repos.createDeployment({
@@ -52,7 +52,7 @@ jobs:
             core.setOutput('deployment_id', deployment.data.id);
 
       - name: Update deployment status - in_progress
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             github.rest.repos.createDeploymentStatus({
@@ -188,7 +188,7 @@ jobs:
 
       - name: Update deployment status - success
         if: success()
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             github.rest.repos.createDeploymentStatus({
@@ -202,7 +202,7 @@ jobs:
 
       - name: Update deployment status - failure
         if: failure()
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             github.rest.repos.createDeploymentStatus({
