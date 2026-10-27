@@ -69,6 +69,27 @@ After merge to `main`:
 
 ---
 
+## Webroot klären (offen)
+
+Stand: Die Auslieferung ist seit dem Umbau statisch. Der Deploy-Workflow kopiert das gesamte Repository per rsync mit `--delete` nach `public_html` auf dem Server. Welcher Ordner der Webserver tatsächlich ausliefert, steht nicht im Repository.
+
+Die Automatik ist deshalb pausiert (`deploy.yml` startet nur noch manuell). Vor der Wiederaktivierung auf dem Server prüfen:
+
+```
+# Nginx
+sudo nginx -T 2>/dev/null | grep -n "server_name\|root "
+
+# Apache
+sudo apachectl -S 2>/dev/null | head -20
+sudo grep -rn "DocumentRoot" /etc/apache2/sites-enabled/
+```
+
+Danach festlegen:
+
+1. Ausgeliefert werden nur `public/*.html`, `public/assets/` und `public/favicon.ico`. `templates/`, `app/`, `content/` und `scripts/` gehören nicht in den Webroot.
+2. Der rsync-Schritt muss den Inhalt von `public/` in den tatsächlichen Webroot kopieren, nicht das Repository-Root.
+3. Erst nach einer Probe-Auslieferung (`scripts/verify-deployment.sh`) den Auto-Deploy auf `push` zu `main` zurücksetzen.
+
 ## Pre-Deployment Validation
 
 Run locally before pushing:

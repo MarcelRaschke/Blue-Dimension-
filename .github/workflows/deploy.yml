@@ -1,8 +1,8 @@
 name: Deploy to Production
 
+# Automatic deployment on push to main is paused: the production webroot must be
+# confirmed first (see DEPLOYMENT.md, "Webroot klären"). Start manually until then.
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
 
 permissions:
