@@ -52,11 +52,20 @@ a:focus-visible { outline: 2px solid var(--neon-pink); outline-offset: 2px; }
 }
 
 .site-footer {
-    padding: 1rem 16px 2rem;
-    text-align: center;
+    padding: 1.5rem 16px 2rem;
     color: var(--muted);
     border-top: 1px solid var(--panel);
 }
+.footer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    text-align: left;
+}
+.footer-inner p { margin: 0; }
+.footer-logo { width: 48px; height: 48px; border-radius: 50%; }
 
 h1, h2 { line-height: 1.2; }
 h1 { color: var(--neon-pink); }

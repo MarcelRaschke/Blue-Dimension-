@@ -32,6 +32,8 @@ function render_page(string $title, string $activeFile, callable $body): void
     <meta name="description" content="<?= h(SITE_TAGLINE) ?>">
     <link rel="stylesheet" href="assets/site.css">
     <link rel="icon" href="favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="<?= h(IMAGE_BASE_PATH . 'favicon-32.png') ?>">
+    <link rel="icon" type="image/png" sizes="192x192" href="<?= h(IMAGE_BASE_PATH . 'favicon-192.png') ?>">
     <link rel="apple-touch-icon" href="<?= h(IMAGE_BASE_PATH . 'apple-touch-icon.png') ?>">
     <meta property="og:type" content="website">
     <meta property="og:title" content="<?= h($pageTitle) ?>">
@@ -54,7 +56,14 @@ function render_page(string $title, string $activeFile, callable $body): void
     <?php $body(); ?>
 </main>
 <footer class="site-footer">
-    <p><?= h(SITE_NAME) ?> · <?= h(SITE_TAGLINE) ?></p>
+    <div class="footer-inner">
+        <?= image_tag('logo-badge', 'footer-logo', false, '') ?>
+        <div>
+            <p><?= h(SITE_NAME) ?> · <?= h(SITE_TAGLINE) ?></p>
+            <p class="muted">Radio LoRa 97.5 · Blue Dimension · Zürich</p>
+            <p class="muted">Design: TwoDivision</p>
+        </div>
+    </div>
 </footer>
 </body>
 </html>

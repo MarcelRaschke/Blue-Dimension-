@@ -46,6 +46,7 @@ HELD = {
 FAVICON_SOURCE = "2aef8653-image.jpg"
 FAVICON_SIZES = [(16, 16), (32, 32), (48, 48), (64, 64)]
 APPLE_TOUCH_SIZE = 180
+PNG_FAVICON_SIZES = [32, 192]
 
 
 def convert(src: pathlib.Path, dst: pathlib.Path, max_edge: int, crop_bottom: int) -> tuple[int, int]:
@@ -67,6 +68,8 @@ def build_favicons(src: pathlib.Path, public: pathlib.Path, out: pathlib.Path) -
         image.resize((APPLE_TOUCH_SIZE, APPLE_TOUCH_SIZE), Image.LANCZOS).save(
             out / "apple-touch-icon.png", "PNG", optimize=True
         )
+        for size in PNG_FAVICON_SIZES:
+            image.resize((size, size), Image.LANCZOS).save(out / f"favicon-{size}.png", "PNG", optimize=True)
 
 
 def main() -> int:

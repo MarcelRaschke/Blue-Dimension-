@@ -128,6 +128,10 @@ foreach (IMAGES as $key => $image) {
 
 check('favicon.ico is served from the docroot', is_file(__DIR__ . '/../public/favicon.ico') && filesize(__DIR__ . '/../public/favicon.ico') > 0);
 check('apple-touch-icon exists', is_file($imageDir . '/apple-touch-icon.png'));
+foreach ([32, 192] as $iconSize) {
+    check("favicon-$iconSize.png exists", is_file($imageDir . "/favicon-$iconSize.png"));
+}
+check('layout links the PNG favicons', str_contains(file_get_contents(__DIR__ . '/../app/layout.php'), 'favicon-32.png'));
 check('og:image is an absolute URL', preg_match('#^https?://[^/]+/assets/img/#', SITE_URL . image_url(OG_IMAGE_KEY)) === 1, SITE_URL);
 
 printf("\n%d checks, %d failed\n", $checks, $failures);
