@@ -1,0 +1,14 @@
+# Render Blueprint for the Blue-Dimension web service.
+# Pins the service to the static Docker build after the PHP-to-static conversion,
+# so the service configuration is versioned with the code instead of drifting in
+# the Render dashboard. One-time sync: Render dashboard -> connect this repo as a
+# Blueprint (or Settings -> Blueprint -> Sync), then Manual Deploy. Fields not set
+# here keep their existing dashboard values on sync.
+services:
+  - type: web
+    name: Blue-Dimension
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /
