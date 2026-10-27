@@ -45,6 +45,11 @@ jobs:
     name: Dependency Review
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    # Bewusst unverbindlich: Dependency Review läuft nur mit aktivem Dependency graph
+    # und GitHub Advanced Security. Ohne diese Repo-Einstellungen scheitert der Job
+    # bei jedem Lauf. Der Befund ist akzeptiert, bis die Einstellungen aktiv sind.
+    # Zum Wiederaktivieren den Schlüssel continue-on-error entfernen.
+    continue-on-error: true
 
     steps:
       - name: Checkout repository
