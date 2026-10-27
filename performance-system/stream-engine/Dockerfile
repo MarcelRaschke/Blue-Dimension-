@@ -13,6 +13,10 @@ RUN npm ci --only=production
 
 COPY src ./src
 
+RUN usermod -aG audio node
+
+USER node
+
 EXPOSE 5001
 
 ENV NODE_ENV=production

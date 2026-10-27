@@ -19,10 +19,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2
         with:
           php-version: "8.3"
           extensions: mbstring, ctype, fileinfo
@@ -37,7 +37,7 @@ jobs:
 
       - name: Create deployment
         id: create_deployment
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             const deployment = await github.rest.repos.createDeployment({
@@ -52,7 +52,7 @@ jobs:
             core.setOutput('deployment_id', deployment.data.id);
 
       - name: Update deployment status - in_progress
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             github.rest.repos.createDeploymentStatus({
@@ -83,7 +83,7 @@ jobs:
 
       - name: Deploy via SFTP
         id: deploy
-        uses: easingthemes/ssh-deploy@main
+        uses: easingthemes/ssh-deploy@2cc5b27bf3029d0455dd5e09fe02633904031447 # main
         with:
           SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_KEY }}
           REMOTE_HOST: ${{ secrets.DEPLOY_HOST }}
@@ -125,7 +125,7 @@ jobs:
 
       - name: Send Slack notification - success
         if: success()
-        uses: slackapi/slack-github-action@v1
+        uses: slackapi/slack-github-action@fcfb566f8b0aab22203f066d80ca1d7e4b5d05b3 # v1
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
         with:
@@ -146,7 +146,7 @@ jobs:
 
       - name: Send Slack notification - failure with rollback
         if: failure() && steps.verify.outcome == 'failure'
-        uses: slackapi/slack-github-action@v1
+        uses: slackapi/slack-github-action@fcfb566f8b0aab22203f066d80ca1d7e4b5d05b3 # v1
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
         with:
@@ -167,7 +167,7 @@ jobs:
 
       - name: Send Slack notification - deployment error
         if: failure() && steps.deploy.outcome == 'failure'
-        uses: slackapi/slack-github-action@v1
+        uses: slackapi/slack-github-action@fcfb566f8b0aab22203f066d80ca1d7e4b5d05b3 # v1
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
         with:
@@ -188,7 +188,7 @@ jobs:
 
       - name: Update deployment status - success
         if: success()
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             github.rest.repos.createDeploymentStatus({
@@ -202,7 +202,7 @@ jobs:
 
       - name: Update deployment status - failure
         if: failure()
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             github.rest.repos.createDeploymentStatus({
