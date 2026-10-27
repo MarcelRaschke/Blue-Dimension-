@@ -14,4 +14,7 @@ COPY .env.example /etc/nginx/.env
 
 EXPOSE 3000
 ENV NODE_ENV=production
-CMD ["nginx", "-g", "daemon off;"]
+
+# Nicht-root: PID-Datei nach /tmp, Port 3000 liegt über 1024
+USER nginx
+CMD ["nginx", "-g", "pid /tmp/nginx.pid; daemon off;"]
