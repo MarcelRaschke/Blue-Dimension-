@@ -114,9 +114,7 @@ app.post('/metadata', async (req, res) => {
       position: validatedPosition
     });
 
-    if (track && artist) {
-      await db.logTrack(track, artist, duration);
-    }
+    await db.logTrack(track, artist, duration);
 
     const metadata = await db.getMetadata();
     res.status(200).json({

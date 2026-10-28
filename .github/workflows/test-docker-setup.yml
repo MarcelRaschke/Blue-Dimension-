@@ -9,6 +9,9 @@ on:
       - '.github/workflows/test-docker-setup.yml'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   test-docker-build:
     name: Test Docker Build
