@@ -74,5 +74,4 @@ jobs:
           path: "."
           format: "JSON"
           args: >
-            --suppress CSHARP-PROJECTS
             --exclude vendor

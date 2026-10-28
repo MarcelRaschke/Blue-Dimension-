@@ -18,7 +18,7 @@ Jede Hypothese wurde gegen Logs der betroffenen Läufe geprüft, nicht gegen den
 | H6 | `monitor.yml` und `pr-validation.yml` scheitern bei Push-Ereignissen | Läufe ohne Jobs, Status `failure`. YAML parst, `secrets` steht in keiner `if:`-Bedingung, die Trigger enthalten kein `push` | offen. Die Ursache liegt nicht im Dateiinhalt, und ich kann sie aus dem Repo nicht sicher bestimmen | nicht geändert. Nächster Schritt: Workflow-Ansicht in GitHub Actions prüfen |
 | H7 | „Test Docker Compose Stack“ scheitert, weil `docker-compose` fehlt | Log: `docker-compose: command not found` (Exit 127) | bestätigt. Der Runner hat nur das Plugin `docker compose` | behoben in `e10c446`. „Test Docker Setup“ ist auf dem Head grün |
 | H8 | Doku verweist noch auf entfernte PHP-Health-Endpunkte | Suche nach `health.php`, `check.json.php`, `metrics.json.php` | bestätigt | behoben: URLs auf `/`, `/news.html`, `/gallery.html`, Hinweis in den betroffenen Dokumenten |
-| H10 | Testsuite schlägt auf `main` fehl: committete HTML weicht von den Vorlagen ab | `php scripts/test-site.php` | bestätigt. Commit `4c6cdb6` hat `public/*.html` von Hand geändert (http→https für 13 Hosts), ohne Vorlagen und Generator anzupassen. Die Tests sind nicht in CI eingebunden | offen, Entscheidung nötig. Ein erneutes Rendern macht die Umstellung rückgängig. Die Umstellung nur zu behalten, ohne Quelle, verletzt den Build-Prozess. Siehe Entscheidungen |
+| H10 | Testsuite schlägt auf `main` fehl: committete HTML weicht von den Vorlagen ab | `php scripts/test-site.php` | bestätigt. Commit `4c6cdb6` hat `public/*.html` von Hand geändert (http→https für 13 Hosts), ohne Vorlagen und Generator anzupassen. Die Tests sind nicht in CI eingebunden | behoben. Die Umstellung läuft jetzt über `HTTPS_VERIFIED_HOSTS` in `app/html.php` und wird vom Generator erzeugt. Die Gästebuch-Texte bleiben im Originalwortlaut, weil dort keine Links stehen. |
 | H9 | Mutable Action-Tags (`@master`, `@v4`) in Workflows | Semgrep-Regel `github-actions-mutable-action-tag` | bestätigt, vorbestehend | offen. `codeql.yml` ist bereits per SHA gepinnt, die übrigen Workflows nicht |
 
 ## Lessons
@@ -55,4 +55,4 @@ Der Psalm-Schritt: entfernen.
 
 Der Webroot des Servers: welcher Ordner, siehe `DEPLOYMENT.md`.
 
-Die https-Umstellung aus `4c6cdb6`: beibehalten und in die Quelle übernehmen (Generator oder Dumps, nur für Hosts mit geprüftem TLS), oder die Seiten aus den Vorlagen neu rendern und die Umstellung verwerfen. Bis dahin weicht `public/*.html` von `templates/` ab.
+Die https-Umstellung ist per Regel im Generator umgesetzt, nur für Hosts aus `HTTPS_VERIFIED_HOSTS`. Neue Hosts nur aufnehmen, wenn sie über TLS antworten. Offen bleiben die Links ohne TLS (`www.123galaxy.ch`), die RealMedia-Streams auf Port 554 und Bilder von Hosts, die nicht geprüft wurden (`a1.soundcloud.com`, `a2.ec-images.myspacecdn.com`).
