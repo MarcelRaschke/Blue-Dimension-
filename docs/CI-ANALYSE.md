@@ -45,6 +45,19 @@ Priorität 5, Hygiene: die Action-Tags in den übrigen Workflows per SHA pinnen,
 
 Priorität 6, Webroot: auf dem Server klären, welcher Ordner ausgeliefert wird, und danach den Auto-Deploy in `deploy.yml` wieder auf `push` zu `main` setzen (siehe `DEPLOYMENT.md`).
 
+## CodeQL: Konfiguration für Admins
+
+Meldung im PR-Check „GitHub Erweiterte Sicherheit / CodeQL“: „1 Konfiguration nicht gefunden … Aktions-Workflow codeql.yml, /language:go“. Die Meldung kommt nicht aus einem Branch. Kein Branch aktiviert Go in `codeql.yml`, auf `main` ist der Eintrag auskommentiert. Vermutlich läuft zusätzlich das Default-Setup von CodeQL, das Go erkennt, weil `performance-system/osc-bridge` Go-Code enthält.
+
+Schritte für einen Admin:
+
+1. Settings → Code security → Code scanning öffnen.
+2. Bei „CodeQL analysis“ prüfen, ob „Default“ aktiv ist. Falls ja: „Switch to advanced“ wählen oder das Default-Setup ausschalten.
+3. Danach ist `.github/workflows/codeql.yml` die einzige CodeQL-Konfiguration. Sie analysiert JavaScript/TypeScript, Actions und Python.
+4. Go wird erst wieder aktiviert, wenn `performance-system/osc-bridge/go.sum` repariert ist (siehe Kommentar in `codeql.yml`).
+
+Diese Schritte können nur im Repo-Admin erledigt werden. Der Code-Stand ändert sich dadurch nicht.
+
 ## Offene Entscheidungen
 
 Advanced Security aktivieren: Ja oder nein. Ohne diese Einstellung bleiben vier Checks rot, unabhängig vom Code.
