@@ -14,8 +14,17 @@ BACKUP_NAME="backup_${TIMESTAMP}.tar.gz"
 BACKUP_PATH="${BACKUP_DIR}/${BACKUP_NAME}"
 LATEST_BACKUP="${BACKUP_DIR}/latest.tar.gz"
 
+# Host key must be pinned beforehand; see scripts/restore-deployment.sh.
+KNOWN_HOSTS="${DEPLOY_KNOWN_HOSTS:-${HOME}/.ssh/known_hosts}"
+
 if [ -z "$DEPLOY_HOST" ] || [ -z "$DEPLOY_USER" ]; then
     echo "Error: DEPLOY_HOST and DEPLOY_USER environment variables must be set"
+    exit 1
+fi
+
+if [ ! -s "$KNOWN_HOSTS" ]; then
+    echo "Error: known_hosts file missing or empty: ${KNOWN_HOSTS}"
+    echo "Pin the deployment host key first (DEPLOY_KNOWN_HOSTS can point to it)."
     exit 1
 fi
 
@@ -24,7 +33,8 @@ echo "Target: ${DEPLOY_USER}@${DEPLOY_HOST}"
 echo "Backup path: ${BACKUP_PATH}"
 
 # Create backup via SSH
-ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no \
+ssh -o ConnectTimeout=10 \
+    -o StrictHostKeyChecking=yes -o UserKnownHostsFile="${KNOWN_HOSTS}" \
     "${DEPLOY_USER}@${DEPLOY_HOST}" << EOF
     set -e
 
