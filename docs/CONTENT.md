@@ -55,6 +55,8 @@ Der Abschnitt „Artwork“ oben in der Galerie nutzt `public/assets/img/` und i
 
 ## Sicherheit
 
+Links zu Hosts aus `HTTPS_VERIFIED_HOSTS` (`app/html.php`) werden als `https://` ausgegeben. Die Liste enthält nur Hosts, die bei der letzten Prüfung über TLS geantwortet haben. Gästebuch-Texte sind Klartext und bleiben unverändert.
+
 Autorengepflegtes HTML läuft durch `sanitize_html()`. Erlaubt sind nur die Tags `a b i u em strong font br p span small` sowie die Attribute `href target color size`. Links sind auf `http(s)`, `mailto:` und lokale Pfade beschränkt, `target="_blank"` bekommt `rel="noopener noreferrer"`. Gästebuch-Kommentare sind reiner Text und werden escaped. Die Tests in `scripts/test-site.php` prüfen das.
 
 ## Offen

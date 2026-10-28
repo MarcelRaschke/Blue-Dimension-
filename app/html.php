@@ -12,6 +12,28 @@ const SANITIZE_KEEP_TAGS = ['a', 'b', 'i', 'u', 'em', 'strong', 'font', 'br', 'p
 const SANITIZE_DROP_TAGS = ['script', 'style', 'iframe', 'object', 'embed', 'svg', 'math', 'form', 'input', 'button', 'textarea', 'select'];
 const SANITIZE_KEEP_ATTRS = ['href', 'target', 'color', 'size'];
 
+/**
+ * Hosts that answered over HTTPS on 2026-10-28 (HTTP 200, 301 or 302).
+ * Links to these hosts are emitted as https://. Other hosts stay as written.
+ * Extend only after checking that the host answers over TLS.
+ */
+const HTTPS_VERIFIED_HOSTS = [
+    'myspace.com', 'www.myspace.com', 'soundcloud.com', 'www.facebook.com',
+    'www.kolonko.ch', 'www.laby.ch', 'www.lora.ch', 'www.gayromeo.com',
+    'www.djdream.ch', 'www.putzfrauenagentur.ch', 'www.streetparade.ch', 'www.trance.fm',
+];
+
+/** Rewrites http:// links to a verified host to https://. Everything else is returned unchanged. */
+function upgrade_https(string $url): string
+{
+    if (!preg_match('#^http://([^/:?\#]+)#i', $url, $m)) {
+        return $url;
+    }
+    return in_array(strtolower($m[1]), HTTPS_VERIFIED_HOSTS, true)
+        ? 'https://' . substr($url, strlen('http://'))
+        : $url;
+}
+
 function sanitize_html(string $html): string
 {
     if (trim($html) === '') {
@@ -92,6 +114,8 @@ function sanitize_attributes(DOMElement $element): void
         if ($lower === 'href') {
             if (!preg_match('#^(https?://|mailto:|/|\#)#i', $value)) {
                 $element->removeAttribute($name);
+            } else {
+                $element->setAttribute($name, upgrade_https($value));
             }
             continue;
         }
