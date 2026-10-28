@@ -282,7 +282,7 @@ curl https://djjessejay.ch/health-check
 curl -I https://djjessejay.ch
 
 # Check PHP status
-curl https://djjessejay.ch/health.php
+curl https://djjessejay.ch/
 
 # View logs
 ssh deploy@djjessejay.ch

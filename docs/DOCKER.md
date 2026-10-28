@@ -168,21 +168,13 @@ All services include health checks:
 # View health status
 docker-compose -f docker-compose.dev.yml ps
 
-# Manually verify endpoints
-curl http://localhost:8000/health.php
-curl http://localhost:8000/health/check.json.php
+# Manually verify pages (the site is static, no PHP endpoints)
+curl -I http://localhost:8000/
+curl -I http://localhost:8000/news.html
 ```
 
-Expected response (health.php):
-```json
-{
-  "status": "healthy",
-  "timestamp": "2026-09-22T10:00:00+00:00",
-  "php_version": "8.3.x",
-  "memory_usage": 2097152,
-  "peak_memory": 2097152
-}
-```
+Expected: `HTTP/1.1 200 OK` with `Content-Type: text/html` for both pages.
+Old PHP endpoints (`health.php`, `health/check.json.php`) were removed, see `docs/CI-ANALYSE.md`.
 
 ## Performance Optimization
 

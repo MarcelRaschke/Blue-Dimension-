@@ -23,10 +23,7 @@ echo "Source: ${LATEST_BACKUP}"
 
 # Restore via SSH with timeout
 timeout $RESTORE_TIMEOUT ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no \
-    "${DEPLOY_USER}@${DEPLOY_HOST}" << EOF || {
-    echo "✗ Restore operation failed or timed out"
-    exit 1
-}
+    "${DEPLOY_USER}@${DEPLOY_HOST}" << EOF
     set -e
 
     if [ ! -f ${LATEST_BACKUP} ]; then
