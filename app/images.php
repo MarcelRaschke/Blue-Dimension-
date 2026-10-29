@@ -26,6 +26,10 @@ const IMAGES = [
     'art-ibm370-variant' => ['width' => 760, 'height' => 428, 'alt' => 'Pixel-Art: IBM System 370 in einer Variante mit mehr Figuren und Laptops'],
     'art-signature-bridge' => ['width' => 1200, 'height' => 800, 'alt' => 'Architekturübersicht DJJJ Signature Bridge v1: vom Audiosignal über Events und OSC bis zur Renderer-Ebene'],
     'credit-twodivision' => ['width' => 1536, 'height' => 512, 'alt' => 'Schriftzug designed by TwoDivision & @R†'],
+    'brand-workflow-board' => ['width' => 1536, 'height' => 857, 'alt' => 'Illustration mit Lego-Figuren zu den Arbeitsschritten Analysieren, Studieren, Erforschen, Hypothese aufstellen, Belegen, Widerlegen, Lernen, Planen, Reparieren, Dokumentieren und Erstellen rund um djjessejay.ch'],
+    'brand-binary-decoder' => ['width' => 1229, 'height' => 1536, 'alt' => 'Binärcode-Tafel, die Byte für Byte „DJ Jesse Jay“ in ASCII dekodiert, mit J·r-Logo, Zürich und Gründungsjahr 1997'],
+    'member-card-cy8er' => ['width' => 760, 'height' => 428, 'alt' => 'Mitgliedskarte DJ Jesse Jay mit J·r-Logo, „cy8er c0wc0d3“, djjessejay.ch, Zürich und Radio LoRa 97.5'],
+    'neon-sign-venue' => ['width' => 1280, 'height' => 427, 'alt' => 'Neon-Schild „DJ Jesse Jay“ mit Logo an einer Bar-Theke'],
 ];
 
 /** Relative URL of an image, usable from any page in public/. */

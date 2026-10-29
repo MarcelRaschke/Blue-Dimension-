@@ -48,6 +48,12 @@ Complete cloud-native architecture for live DJ performances with:
 │  │         │  (React)       │                              │  │
 │  │         └────────────────┘                              │  │
 │  │                                                           │  │
+│  │         ┌────────────────┐                              │  │
+│  │         │  Chunk Viewer  │                              │  │
+│  │         │  :3001         │                              │  │
+│  │         │  (Three.js)    │                              │  │
+│  │         └────────────────┘                              │  │
+│  │                                                           │  │
 │  └──────────────────────────────────────────────────────────┘  │
 │                                                                   │
 └─────────────────────────────────────────────────────────────────┘
@@ -93,6 +99,13 @@ React-based monitoring and control interface.
 - Track metadata display
 - System health checks
 - See: [Web Dashboard](./performance-system/web-dashboard/README.md)
+
+### Chunk Viewer
+Three.js viewer and streaming pipeline for tiled mesh chunks (venue scans, terrain, point-cloud exports).
+- Port: 3001 (HTTP)
+- Loads/unloads `chunk_r<row>_c<col>.glb` tiles around the camera based on a manifest
+- Framework-agnostic streaming core, unit-tested without a WebGL context
+- See: [Chunk Viewer](./performance-system/chunk-viewer/README.md)
 
 ## Quick Start
 
@@ -412,7 +425,8 @@ blue-dimension-/
 │   ├── stream-engine/             # FFmpeg audio processing
 │   ├── osc-bridge/                # CDJ synchronization
 │   ├── api-server/                # Metadata and analytics API
-│   └── web-dashboard/             # React monitoring interface
+│   ├── web-dashboard/             # React monitoring interface
+│   └── chunk-viewer/              # Three.js chunk-grid viewer
 ├── .github/workflows/             # CI/CD pipeline
 └── README.md                       # This file
 ```

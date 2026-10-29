@@ -1,0 +1,28 @@
+{
+  "name": "blue-dimension-chunk-viewer",
+  "version": "1.0.0",
+  "description": "WebGL viewer and streaming pipeline for tiled mesh chunks (Blue Dimension performance system)",
+  "main": "public/index.html",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "three": "^0.186.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/three": "^0.186.0",
+    "eslint": "^10.13.0",
+    "globals": "^17.13.0",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^8.72.1",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
+  }
+}
