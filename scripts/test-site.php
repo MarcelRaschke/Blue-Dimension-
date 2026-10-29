@@ -159,5 +159,32 @@ foreach ($staticPages as $output => [$template, $query]) {
 }
 $_GET = [];
 
+// Links to plain http are only allowed for hosts that do not answer over TLS
+// (RealMedia archive on port 554, sites without https). Every other host must
+// be written as https in the templates or in content/*.json. Pages added later
+// are covered by the glob, so new links are checked without a list change.
+const HTTP_LEGACY_HOSTS = [
+    '193.192.228.134', '195.210.0.134', 'www.123galaxy.ch', 'a1.soundcloud.com',
+    'a2.ec-images.myspacecdn.com', 'www.latex-deluxe.com', 'www.mentalx.virus.ch', 'Dejavu',
+];
+
+$plainHttpHosts = [];
+foreach (glob(__DIR__ . '/../public/*.html') as $page) {
+    preg_match_all('#href="http://([^/:"]+)#i', (string) file_get_contents($page), $matches);
+    foreach ($matches[1] as $host) {
+        $plainHttpHosts[$host] = true;
+    }
+}
+$unexpectedHosts = array_diff(array_keys($plainHttpHosts), HTTP_LEGACY_HOSTS);
+check('no new plain-http links outside the legacy host list', $unexpectedHosts === [], implode(', ', $unexpectedHosts));
+
+$templateHttp = [];
+foreach (glob(__DIR__ . '/../templates/*.php') as $file) {
+    if (preg_match('#http://#', (string) file_get_contents($file))) {
+        $templateHttp[] = basename($file);
+    }
+}
+check('templates and app code contain no http:// literals', $templateHttp === [], implode(', ', $templateHttp));
+
 printf("\n%d checks, %d failed\n", $checks, $failures);
 exit($failures === 0 ? 0 : 1);
