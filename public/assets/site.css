@@ -42,7 +42,7 @@ a:focus-visible { outline: 2px solid var(--neon-pink); outline-offset: 2px; }
 .brand-logo { width: 32px; height: 32px; border-radius: 50%; }
 
 .site-nav { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; }
-.site-nav a { text-decoration: none; }
+.site-nav a { text-decoration: none; display: inline-block; padding: 0.5rem 2px; }
 .site-nav a[aria-current="page"] { color: var(--neon-pink); }
 
 .site-main {
@@ -96,6 +96,7 @@ h1 { color: var(--neon-pink); }
 .gallery img { width: 100%; height: auto; display: block; border-radius: 4px; }
 
 .lang-switch { display: flex; gap: 1rem; margin-bottom: 1rem; }
+.lang-switch a { display: inline-block; padding: 0.5rem 2px; }
 .lang-switch a[aria-current="true"] { color: var(--neon-pink); font-weight: 700; }
 
 .link-list { padding-left: 1.2rem; }
