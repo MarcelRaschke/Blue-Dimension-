@@ -1,5 +1,7 @@
 # Phase 3: Continuous Monitoring & Performance Analytics
 
+> Hinweis: Die PHP-Health-Endpunkte (`health.php`, `health/check.json.php`, `health/metrics.json.php`) sind mit der statischen Auslieferung entfallen. Ersatz: `/` (Startseite), `/news.html` und `/gallery.html`. Details: `docs/CI-ANALYSE.md`.
+
 ## Overview
 
 Phase 3 implements continuous health monitoring, performance metrics tracking, and deployment analytics for the Blue Dimension production environment. This phase runs automatically on a 5-minute schedule and provides real-time visibility into system health.
@@ -11,9 +13,9 @@ Phase 3 implements continuous health monitoring, performance metrics tracking, a
 Automated health checks running every 5 minutes to verify production system health.
 
 **Features:**
-- Simple health check endpoint verification (`/health.php`)
-- Detailed health diagnostics endpoint verification (`/health/check.json.php`)
-- Performance metrics endpoint verification (`/health/metrics.json.php`)
+- Simple health check endpoint verification (`/`)
+- Detailed health diagnostics endpoint verification (`/news.html`)
+- Performance metrics endpoint verification (`/gallery.html`)
 - Response time monitoring and alerting
 - Slack notifications for health failures
 - GitHub Environments deployment history tracking
@@ -28,7 +30,7 @@ Automated health checks running every 5 minutes to verify production system heal
 
 ### 2. Health Check Endpoints
 
-#### Simple Health Endpoint (`/health.php`)
+#### Simple Health Endpoint (`/`)
 Returns basic health status with PHP version and memory usage.
 
 **Response:**
@@ -44,7 +46,7 @@ Returns basic health status with PHP version and memory usage.
 
 **Threshold:** 200ms response time
 
-#### Detailed Health Endpoint (`/health/check.json.php`)
+#### Detailed Health Endpoint (`/news.html`)
 Returns comprehensive health diagnostics including file system and critical file verification.
 
 **Response:**
@@ -64,7 +66,7 @@ Returns comprehensive health diagnostics including file system and critical file
 
 **Threshold:** 2000ms response time (warning if exceeded)
 
-#### Performance Metrics Endpoint (`/health/metrics.json.php`)
+#### Performance Metrics Endpoint (`/gallery.html`)
 Returns system performance metrics and deployment analytics.
 
 **Response:**
@@ -213,13 +215,13 @@ gh workflow run monitor.yml --repo MarcelRaschke/Blue-Dimension-
 ### Test Health Endpoints Locally
 ```bash
 # Test simple health endpoint
-curl https://djjessejay.ch/health.php
+curl https://djjessejay.ch/
 
 # Test detailed health endpoint
-curl https://djjessejay.ch/health/check.json.php
+curl https://djjessejay.ch/news.html
 
 # Test metrics endpoint
-curl https://djjessejay.ch/health/metrics.json.php
+curl https://djjessejay.ch/gallery.html
 ```
 
 ### Test Slack Notifications
@@ -232,7 +234,7 @@ To test Slack notifications without triggering a failure:
 ### Verify Performance Thresholds
 ```bash
 # Measure response time
-time curl https://djjessejay.ch/health/check.json.php
+time curl https://djjessejay.ch/news.html
 ```
 
 ## Troubleshooting

@@ -1,5 +1,7 @@
 # Deployment Best Practices & Troubleshooting
 
+> Hinweis: Die PHP-Health-Endpunkte (`health.php`, `health/check.json.php`, `health/metrics.json.php`) sind mit der statischen Auslieferung entfallen. Ersatz: `/` (Startseite), `/news.html` und `/gallery.html`. Details: `docs/CI-ANALYSE.md`.
+
 Comprehensive guide for managing Blue Dimension deployment automation, monitoring, and troubleshooting.
 
 ## Deployment Pipeline Overview
@@ -49,7 +51,7 @@ git diff --cached | grep -i "password\|secret\|token\|key"
 # Test with local Docker stack
 docker-compose -f docker-compose.dev.yml up -d
 sleep 10
-curl http://localhost:8000/health.php
+curl http://localhost:8000/
 docker-compose -f docker-compose.dev.yml down
 ```
 
@@ -149,19 +151,19 @@ sudo systemctl restart php-fpm
 
 **Simple Health Check:**
 ```bash
-curl https://djjessejay.ch/health.php
+curl https://djjessejay.ch/
 # Returns: { "status": "healthy", "timestamp": "...", "php_version": "8.3.x" }
 ```
 
 **Detailed Diagnostics:**
 ```bash
-curl https://djjessejay.ch/health/check.json.php
+curl https://djjessejay.ch/news.html
 # Returns: { "status": "ok", "database": "connected", "cache": "available", ... }
 ```
 
 **Performance Metrics:**
 ```bash
-curl https://djjessejay.ch/health/metrics.json.php
+curl https://djjessejay.ch/gallery.html
 # Returns: { "uptime_seconds": 86400, "load_average": [0.1, 0.15, 0.2], "disk_usage": "45%" }
 ```
 
@@ -208,7 +210,7 @@ tail -f /var/log/php-fpm/error.log
 tail -f /var/log/nginx/error.log
 
 # Test health endpoint
-curl -v https://djjessejay.ch/health.php
+curl -v https://djjessejay.ch/
 curl -v https://djjessejay.ch/
 
 # Check database connection
@@ -256,7 +258,7 @@ ssh deploy@djjessejay.ch "tar -czf /tmp/test.tar.gz /home/deploy/public_html/"
 **Diagnosis:**
 ```bash
 # Check response time
-time curl https://djjessejay.ch/health.php
+time curl https://djjessejay.ch/
 
 # Monitor server load
 ssh deploy@djjessejay.ch "top -b -n 1"
@@ -325,7 +327,7 @@ ssh deploy@djjessejay.ch "ls -la /home/deploy/public_html/"
 
 **Recommendations:**
 ```php
-// Optimize health.php endpoint
+// Optimize the start page
 - Cache database connectivity check (5-min TTL)
 - Lazy-load non-critical diagnostics
 - Return minimal data (< 1KB)
@@ -353,7 +355,7 @@ tar -xzf $BACKUP_FILE -C /home/deploy/
 sudo systemctl start nginx
 
 # Verify health
-curl http://localhost/health.php
+curl http://localhost/
 ```
 
 ### Database Recovery
@@ -455,9 +457,9 @@ chmod 644 ~/.ssh/id_rsa.pub
 - `.github/workflows/monitor.yml` - Health monitoring
 - `scripts/backup-deployment.sh` - Backup creation
 - `scripts/restore-deployment.sh` - Rollback restoration
-- `public/health.php` - Simple health check
-- `public/health/check.json.php` - Detailed diagnostics
-- `public/health/metrics.json.php` - Performance metrics
+- `public/` - Simple health check
+- `public/news.html` - Detailed diagnostics
+- `public/gallery.html` - Performance metrics
 
 **External Resources:**
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)

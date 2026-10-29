@@ -90,6 +90,32 @@ Danach festlegen:
 2. Der rsync-Schritt muss den Inhalt von `public/` in den tatsächlichen Webroot kopieren, nicht das Repository-Root.
 3. Erst nach einer Probe-Auslieferung (`scripts/verify-deployment.sh`) den Auto-Deploy auf `push` zu `main` zurücksetzen.
 
+## Host-Schlüssel hinterlegen
+
+Restore- und Backup-Skript prüfen den SSH-Host-Schlüssel des Deployment-Hosts. Unbekannte Schlüssel werden nicht mehr akzeptiert. Die Skripte brechen ab, solange keine `known_hosts`-Datei mit dem Schlüssel vorhanden ist.
+
+Einmalig auf dem Betreiber-Rechner:
+
+```
+ssh-keyscan -t ed25519 DEPLOY_HOST > ~/.ssh/deploy_known_hosts
+ssh-keygen -lf ~/.ssh/deploy_known_hosts
+```
+
+Den ausgegebenen Fingerabdruck mit dem des Servers vergleichen. Den Vergleich nicht über dieselbe Verbindung machen, sondern direkt auf dem Server, zum Beispiel über die Konsole des Hosters:
+
+```
+sudo ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
+```
+
+Stimmen beide Fingerabdrücke überein, die Datei benutzen:
+
+```
+export DEPLOY_KNOWN_HOSTS=~/.ssh/deploy_known_hosts
+DEPLOY_HOST=DEPLOY_HOST DEPLOY_USER=DEPLOY_USER scripts/restore-deployment.sh
+```
+
+Offen für den Deploy-Workflow: `deploy.yml` setzt `DEPLOY_KNOWN_HOSTS` noch nicht. Ohne diese Angabe scheitert der Backup-Schritt mit Warnung, und der Deploy läuft ohne Backup weiter. Vor der Wiederaktivierung des Auto-Deploy muss der Schlüssel als Secret hinterlegt und im Workflow in eine Datei geschrieben werden.
+
 ## Pre-Deployment Validation
 
 Run locally before pushing:
@@ -282,7 +308,7 @@ curl https://djjessejay.ch/health-check
 curl -I https://djjessejay.ch
 
 # Check PHP status
-curl https://djjessejay.ch/health.php
+curl https://djjessejay.ch/
 
 # View logs
 ssh deploy@djjessejay.ch

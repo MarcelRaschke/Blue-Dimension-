@@ -12,7 +12,7 @@ render_page('Links', 'links.html', static function () use ($links): void { ?>
         <?php foreach ($links as $link): ?>
             <li>
                 <?php if ($link['url'] !== ''): ?>
-                    <a href="<?= h($link['url']) ?>" rel="noopener noreferrer" target="_blank"><?= h($link['name']) ?></a>
+                    <a href="<?= h(upgrade_https($link['url'])) ?>" rel="noopener noreferrer" target="_blank"><?= h($link['name']) ?></a>
                 <?php else: ?>
                     <?= h($link['name']) ?>
                 <?php endif; ?>

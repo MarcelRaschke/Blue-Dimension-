@@ -12,8 +12,18 @@ BACKUP_DIR="/var/backups/deployments"
 LATEST_BACKUP="${BACKUP_DIR}/latest.tar.gz"
 RESTORE_TIMEOUT=60
 
+# Host key must be pinned beforehand (ssh-keyscan once, verify the fingerprint
+# out of band). Blind acceptance of unknown keys is not allowed.
+KNOWN_HOSTS="${DEPLOY_KNOWN_HOSTS:-${HOME}/.ssh/known_hosts}"
+
 if [ -z "$DEPLOY_HOST" ] || [ -z "$DEPLOY_USER" ]; then
     echo "Error: DEPLOY_HOST and DEPLOY_USER environment variables must be set"
+    exit 1
+fi
+
+if [ ! -s "$KNOWN_HOSTS" ]; then
+    echo "Error: known_hosts file missing or empty: ${KNOWN_HOSTS}"
+    echo "Pin the deployment host key first (DEPLOY_KNOWN_HOSTS can point to it)."
     exit 1
 fi
 
@@ -22,11 +32,9 @@ echo "Target: ${DEPLOY_USER}@${DEPLOY_HOST}"
 echo "Source: ${LATEST_BACKUP}"
 
 # Restore via SSH with timeout
-timeout $RESTORE_TIMEOUT ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=no \
-    "${DEPLOY_USER}@${DEPLOY_HOST}" << EOF || {
-    echo "✗ Restore operation failed or timed out"
-    exit 1
-}
+timeout $RESTORE_TIMEOUT ssh -o ConnectTimeout=10 \
+    -o StrictHostKeyChecking=yes -o UserKnownHostsFile="${KNOWN_HOSTS}" \
+    "${DEPLOY_USER}@${DEPLOY_HOST}" << EOF
     set -e
 
     if [ ! -f ${LATEST_BACKUP} ]; then
