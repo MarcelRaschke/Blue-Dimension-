@@ -1,0 +1,275 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Blue Dimension System Map</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: Kopfzeile, darunter Karte (verschiebbar) links und Detailpanel rechts; auf dem Telefon untereinander. Bewusst nur dunkel (Neon auf Nachtblau). */
+:root{
+  --bg:#0b0820;
+  --bg-2:#130e33;
+  --grid:#241c55;
+  --fg:#ece8ff;
+  --muted:#a59ccf;
+  --line:#5a4f99;
+  --edge:#29e6ff;
+  --track:#ff3fb4;
+  --bdos:#a78bff;
+  --ivdj:#ffb547;
+  --studio:#5cf2a3;
+  --font-display:"Chakra Petch","Segoe UI",system-ui,sans-serif;
+  --font-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1240px;margin:0 auto;padding-block:28px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:20px}
+header{display:grid;gap:10px}
+.kicker{font-family:var(--font-mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--edge)}
+h1{font-family:var(--font-display);font-weight:700;font-size:clamp(28px,4.4vw,46px);line-height:1.05;margin:0;text-wrap:balance;letter-spacing:.01em;text-shadow:0 0 18px rgba(255,63,180,.45)}
+.lead{color:var(--muted);max-width:68ch;margin:0}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{font-family:var(--font-mono);font-size:12px;border:1px solid var(--line);background:transparent;color:var(--fg);padding:6px 10px;border-radius:999px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+.chip i{width:9px;height:9px;border-radius:50%;display:inline-block;background:var(--c);box-shadow:0 0 8px var(--c)}
+.chip[aria-pressed="true"]{border-color:var(--c);box-shadow:0 0 0 1px var(--c) inset}
+.chip:focus-visible,.btn:focus-visible,.node:focus-visible{outline:2px solid var(--edge);outline-offset:2px}
+.btn{font-family:var(--font-mono);font-size:12px;border:1px solid var(--line);background:var(--bg-2);color:var(--muted);padding:6px 10px;border-radius:6px;cursor:pointer;margin-left:auto}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start}
+@media (max-width:900px){.main{grid-template-columns:1fr}}
+.board{border:1px solid var(--grid);border-radius:10px;background:
+  linear-gradient(var(--bg-2),var(--bg-2)) padding-box;overflow-x:auto;min-width:0;position:relative}
+svg{display:block;width:100%;min-width:760px;height:auto;touch-action:none}
+.hint{font-family:var(--font-mono);font-size:11.5px;color:var(--muted);padding:8px 12px;border-top:1px solid var(--grid)}
+.node{cursor:grab}
+.node.dragging{cursor:grabbing}
+.node rect{fill:var(--bg);stroke-width:1.5}
+.node .name{font-family:var(--font-display);font-weight:700;font-size:14px;fill:var(--fg)}
+.node .sub{font-family:var(--font-mono);font-size:10.5px;fill:var(--muted)}
+.node.dim,.link.dim,.llabel.dim{opacity:.16}
+.node.sel rect{stroke-width:3}
+.link{fill:none;stroke-width:1.6}
+.link.contract{stroke-dasharray:6 5;animation:flow 1.2s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-22}}
+@media (prefers-reduced-motion:reduce){.link.contract{animation:none}}
+.llabel{font-family:var(--font-mono);font-size:10.5px;fill:var(--muted);paint-order:stroke;stroke:var(--bg-2);stroke-width:4px}
+aside{border:1px solid var(--grid);border-radius:10px;background:var(--bg-2);padding:18px;display:grid;gap:12px;min-width:0}
+aside .tag{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--c,var(--muted))}
+aside h2{font-family:var(--font-display);font-size:22px;margin:0;line-height:1.15}
+aside p{margin:0;color:var(--muted)}
+aside ul{margin:0;padding-left:18px;display:grid;gap:4px}
+aside .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-family:var(--font-mono);font-size:12px}
+aside .kv dt{color:var(--muted)}
+aside .kv dd{margin:0}
+.contracts{border:1px solid var(--grid);border-radius:10px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:620px;font-size:13.5px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--grid);vertical-align:top}
+th{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500}
+td code{font-family:var(--font-mono);font-size:12.5px;color:var(--edge)}
+tr:last-child td{border-bottom:0}
+h3{font-family:var(--font-display);font-size:18px;margin:4px 0 0}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="kicker">DJ Jesse Jay · Systemarchitektur · Stand 27.10.2026</div>
+    <h1>Ein Track-Event, vier Systeme</h1>
+    <p class="lead">Studio, Website, Blue Dimension OS und iVDJ koppeln sich nur über drei Verträge. Karte anklicken für Details, Knoten ziehen zum Umordnen, Filter blenden ein System hervor.</p>
+    <div class="bar" id="filters">
+      <button class="chip" style="--c:var(--edge)" data-sys="edge" aria-pressed="false" id="f-edge"><i></i>djjessejay.ch Edge</button>
+      <button class="chip" style="--c:var(--track)" data-sys="track" aria-pressed="false" id="f-track"><i></i>Track-ID</button>
+      <button class="chip" style="--c:var(--bdos)" data-sys="bdos" aria-pressed="false" id="f-bdos"><i></i>Blue Dimension OS</button>
+      <button class="chip" style="--c:var(--ivdj)" data-sys="ivdj" aria-pressed="false" id="f-ivdj"><i></i>iVDJ</button>
+      <button class="chip" style="--c:var(--studio)" data-sys="studio" aria-pressed="false" id="f-studio"><i></i>Studio</button>
+      <button class="btn" id="reset">Layout zurücksetzen</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <div class="board">
+      <svg id="map" viewBox="0 0 960 620" role="img" aria-label="Systemkarte mit verschiebbaren Knoten">
+        <defs>
+          <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#241c55"/></pattern>
+          <filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <rect width="960" height="620" fill="url(#dots)"/>
+        <g id="links"></g>
+        <g id="nodes"></g>
+      </svg>
+      <div class="hint">Gestrichelt und animiert: signierte Track-Events. Layout bleibt in diesem Browser gespeichert.</div>
+    </div>
+    <aside id="panel" aria-live="polite"></aside>
+  </div>
+
+  <section>
+    <h3>Die drei Verträge</h3>
+    <div class="contracts">
+      <table>
+        <thead><tr><th>Vertrag</th><th>Format</th><th>Produzent</th><th>Konsumenten</th><th>Schutz</th></tr></thead>
+        <tbody>
+          <tr><td>Track-Event</td><td><code>JSON Schema v1</code></td><td>Track-ID Relay</td><td>Website-Player, Archiv, BD OS, iVDJ</td><td>Ed25519, Zeitfenster gegen Replay</td></tr>
+          <tr><td>/api hinter wdjjj</td><td><code>HTTPS, Allow-List-Header</code></td><td>Worker wdjjj</td><td>Express-Origin</td><td>Access-Service-Token, fail closed</td></tr>
+          <tr><td>OSC-Adressraum</td><td><code>/bd/track/*, /bd/cue/*</code></td><td>BD OS, Track-ID-Adapter</td><td>TouchDesigner, DMX, iVDJ</td><td>nur LAN, PTP-Zeitbasis</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  const SYS={
+    edge:{c:'var(--edge)',n:'djjessejay.ch Edge'},
+    track:{c:'var(--track)',n:'Blue Dimension Track-ID'},
+    bdos:{c:'var(--bdos)',n:'Blue Dimension OS'},
+    ivdj:{c:'var(--ivdj)',n:'iVDJ'},
+    studio:{c:'var(--studio)',n:'LoRa-Studio'}
+  };
+  const W=176,H=54;
+  const NODES=[
+    {id:'cdj',sys:'studio',x:40,y:40,name:'CDJ/XDJ + DJM',sub:'Pro DJ Link, Nexus',
+      what:'Die Geräte im LoRa-Studio. Sie bleiben unangetastet; alles liest nur mit.',
+      facts:[['Zugang','nur LoRa-Equipment'],['Ausgang','Livestream lora.ch']],
+      todo:['Exakte Gerätemodelle notieren','USB-Stick für Play History bereithalten']},
+    {id:'usb',sys:'track',x:40,y:150,name:'Play History',sub:'Stufe A, nach Sendung',
+      what:'Liest die Verlaufsdaten vom USB-Stick und erzeugt Cuesheets pro Sendestunde. Braucht keinen Studiozugang.',
+      facts:[['Ausgabe','Cuesheet pro Stunde'],['Risiko','keins für die Sendung']],
+      todo:['Parser bauen','Gegen eigene Setliste testen']},
+    {id:'relay',sys:'track',x:300,y:40,name:'Track-ID Relay',sub:'Stufe B/C, passiv',
+      what:'Liest Pro-DJ-Link-Status passiv mit, entscheidet per Fader- und Play-State-Modell, welcher Deck on air ist, und signiert jedes Event.',
+      facts:[['Signatur','Ed25519'],['Freigabe','LoRa ausstehend'],['Fallback','manuelle Eingabe']],
+      todo:['Mail an LoRa senden','Debounce und confidence-Schwelle festlegen']},
+    {id:'worker',sys:'edge',x:300,y:220,name:'Worker wdjjj',sub:'einziger Eingang',
+      what:'Routet statisch und /api, baut Header aus einer Allow-List, hängt das Access-Token an und prüft Track-Signaturen.',
+      facts:[['Health','/__wdjjj/health'],['Fehlendes Secret','502'],['PRs','178, dann 180']],
+      todo:['PR 178 mergen, Secrets binden','HTTP-520 am Origin klären']},
+    {id:'do',sys:'track',x:560,y:220,name:'Durable Object',sub:'Track-Events pro Sendung',
+      what:'Hält die Events einer Sendung geordnet, verteilt sie per SSE und schreibt zum Stundenende das Cuesheet ins Archiv.',
+      facts:[['Verteilung','SSE'],['Schlüssel','show_id']],
+      todo:['JSON Schema v1 festschreiben','Reconnect-Test']},
+    {id:'assets',sys:'edge',x:760,y:120,name:'Static Assets',sub:'dist/, Neon-Frontend',
+      what:'Nur die öffentlichen Dateien. Ein Build kopiert per Allow-List nach dist/, damit keine SQL-Dumps oder server.js ausgeliefert werden.',
+      facts:[['Quelle','npm run build'],['Verboten','.sql, server.js']],
+      todo:['build-Script anlegen','Pages-Projekt djjj trennen oder umstellen']},
+    {id:'player',sys:'edge',x:760,y:30,name:'Website-Player',sub:'Now playing, Archiv',
+      what:'Zeigt den laufenden Track live und die Cuesheets vergangener Sendungen.',
+      facts:[['Live','SSE vom Durable Object'],['Archiv','öffentlich oder NFT-gated, offen']],
+      todo:['Entscheid Archiv-Sichtbarkeit']},
+    {id:'origin',sys:'edge',x:300,y:400,name:'Express-Origin',sub:'Formular, Gästebuch',
+      what:'Der einzige Ort mit Personendaten. Nur über den Worker mit Access-Token erreichbar.',
+      facts:[['Bot-Schutz','Turnstile statt reCAPTCHA'],['Daten','Löschfrist festlegen']],
+      todo:['Dumps aus Historie entfernen','Datenschutztext anpassen']},
+    {id:'bdos',sys:'bdos',x:560,y:400,name:'Blue Dimension OS',sub:'OSC, Scheduler, PTP',
+      what:'Echtzeit-Steuerung für Performance und Broadcast in Mojo, nur Stdlib. Läuft im Studio auch ohne Netz auf einem Rechner.',
+      facts:[['OSC p99','< 200 µs'],['Scheduler p99.9','< 500 µs'],['PTP','± 100 µs'],['GPU','> 2 GB/s']],
+      todo:['Repo-Name festlegen','Track-ID-Adapter /bd/track/*']},
+    {id:'offline',sys:'bdos',x:560,y:530,name:'Video + TidalCycles',sub:'offline, Batch',
+      what:'Video-Pipeline (sechs Shots, 125-BPM-Grid, 120 fps) und Tidal nach SuperCollider nach WAV. Liefern fertige Assets, nie Live-Abhängigkeiten.',
+      facts:[['Video','LTX-2 / HunyuanCustom'],['Audio','Rekordbox-Import'],['Kennzeichnung','KI-erzeugt in Metadaten']],
+      todo:['KI-Kennzeichnung in Asset-Metadaten']},
+    {id:'ivdj',sys:'ivdj',x:760,y:400,name:'iVDJ',sub:'Browser-Workstation',
+      what:'Mix-Logik bleibt im Browser. Die Edge liefert Zustand, Metadaten und Dateien; Track-Events nur lesend.',
+      facts:[['Edge','D1, KV, Durable Objects'],['POST /mix','P95 < 50 ms'],['Last','50–1000 req/s']],
+      todo:['SSE read-only anbinden','Baseline-Messungen im Harness']},
+    {id:'td',sys:'bdos',x:760,y:530,name:'TouchDesigner / DMX',sub:'Visuals, Licht',
+      what:'Konsumiert OSC-Cues und Track-Events für audioreaktive Visuals und Licht.',
+      facts:[['Transport','OSC im LAN'],['Takt','PTP']],
+      todo:['OSC-Adressraum dokumentieren']}
+  ];
+  const LINKS=[
+    ['cdj','relay','passiv mitlesen',false],
+    ['cdj','usb','USB-Stick',false],
+    ['relay','worker','POST /api/track',true],
+    ['usb','do','Cuesheets',false],
+    ['worker','do','geprüftes Event',true],
+    ['do','player','SSE',true],
+    ['worker','assets','statisch',false],
+    ['worker','origin','Access-Token',false],
+    ['do','bdos','OSC-Topics',true],
+    ['do','ivdj','SSE read-only',true],
+    ['offline','bdos','fertige Assets',false],
+    ['bdos','td','OSC-Cues',false],
+    ['ivdj','bdos','OSC via cy8er-mcp',false]
+  ];
+  const KEY='bd-system-map-layout-v1';
+  const home=Object.fromEntries(NODES.map(n=>[n.id,{x:n.x,y:n.y}]));
+  try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s)NODES.forEach(n=>{if(s[n.id]){n.x=s[n.id].x;n.y=s[n.id].y}})}catch(e){}
+  const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(Object.fromEntries(NODES.map(n=>[n.id,{x:n.x,y:n.y}]))))}catch(e){}};
+
+  const svg=document.getElementById('map'),gL=document.getElementById('links'),gN=document.getElementById('nodes'),panel=document.getElementById('panel');
+  const NS='http://www.w3.org/2000/svg',byId=Object.fromEntries(NODES.map(n=>[n.id,n]));
+  const el=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e};
+  let filter=null,selected='do';
+
+  const linkEls=LINKS.map(([a,b,label,contract])=>{
+    const p=el('path',{class:'link'+(contract?' contract':'')});
+    p.style.stroke=contract?'var(--track)':'var(--line)';
+    const t=el('text',{class:'llabel','text-anchor':'middle'});t.textContent=label;
+    gL.append(p,t);return{a,b,p,t};
+  });
+  function anchor(n,o){
+    const cx=n.x+W/2,cy=n.y+H/2,dx=o.x+W/2-cx,dy=o.y+H/2-cy;
+    if(Math.abs(dx)*H>Math.abs(dy)*W)return{x:cx+Math.sign(dx)*W/2,y:cy,h:true};
+    return{x:cx,y:cy+Math.sign(dy)*H/2,h:false};
+  }
+  function drawLinks(){
+    linkEls.forEach(l=>{
+      const A=byId[l.a],B=byId[l.b],s=anchor(A,B),e=anchor(B,A);
+      const d=s.h?`M${s.x} ${s.y}C${(s.x+e.x)/2} ${s.y} ${(s.x+e.x)/2} ${e.y} ${e.x} ${e.y}`:`M${s.x} ${s.y}C${s.x} ${(s.y+e.y)/2} ${e.x} ${(s.y+e.y)/2} ${e.x} ${e.y}`;
+      l.p.setAttribute('d',d);
+      l.t.setAttribute('x',(s.x+e.x)/2);l.t.setAttribute('y',(s.y+e.y)/2-6);
+    });
+  }
+  const nodeEls={};
+  NODES.forEach(n=>{
+    const g=el('g',{class:'node',tabindex:'0',role:'button','aria-label':n.name});
+    const c=SYS[n.sys].c;
+    const r=el('rect',{width:W,height:H,rx:8});r.style.stroke=c;
+    const glow=el('rect',{width:W,height:H,rx:8,fill:'none',filter:'url(#glow)',opacity:'.55'});glow.style.stroke=c;
+    const t1=el('text',{class:'name',x:14,y:23});t1.textContent=n.name;
+    const t2=el('text',{class:'sub',x:14,y:41});t2.textContent=n.sub;
+    g.append(glow,r,t1,t2);gN.append(g);nodeEls[n.id]=g;
+    g.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();select(n.id)}});
+    let start=null;
+    g.addEventListener('pointerdown',ev=>{
+      const pt=toSvg(ev);start={px:pt.x,py:pt.y,x:n.x,y:n.y,moved:false};
+      g.setPointerCapture(ev.pointerId);g.classList.add('dragging');
+    });
+    g.addEventListener('pointermove',ev=>{
+      if(!start)return;const pt=toSvg(ev),dx=pt.x-start.px,dy=pt.y-start.py;
+      if(Math.abs(dx)+Math.abs(dy)>3)start.moved=true;
+      n.x=Math.max(0,Math.min(960-W,start.x+dx));n.y=Math.max(0,Math.min(620-H,start.y+dy));
+      place(n);drawLinks();
+    });
+    const end=()=>{if(!start)return;g.classList.remove('dragging');if(start.moved)save();else select(n.id);start=null};
+    g.addEventListener('pointerup',end);g.addEventListener('pointercancel',end);
+    place(n);
+  });
+  function place(n){nodeEls[n.id].setAttribute('transform',`translate(${n.x} ${n.y})`)}
+  function toSvg(ev){const p=svg.createSVGPoint();p.x=ev.clientX;p.y=ev.clientY;return p.matrixTransform(svg.getScreenCTM().inverse())}
+
+  function applyFilter(){
+    NODES.forEach(n=>nodeEls[n.id].classList.toggle('dim',!!filter&&n.sys!==filter));
+    linkEls.forEach(l=>{const on=!filter||byId[l.a].sys===filter||byId[l.b].sys===filter;l.p.classList.toggle('dim',!on);l.t.classList.toggle('dim',!on)});
+    document.querySelectorAll('#filters .chip').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.sys===filter)));
+  }
+  function select(id){
+    selected=id;const n=byId[id],s=SYS[n.sys];
+    Object.entries(nodeEls).forEach(([k,g])=>g.classList.toggle('sel',k===id));
+    const ins=LINKS.filter(l=>l[1]===id).map(l=>byId[l[0]].name+' · '+l[2]);
+    const outs=LINKS.filter(l=>l[0]===id).map(l=>byId[l[1]].name+' · '+l[2]);
+    panel.style.setProperty('--c',s.c);
+    panel.innerHTML='';
+    const add=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;panel.append(e);return e};
+    add('div','tag',s.n);add('h2',null,n.name);add('p',null,n.what);
+    const dl=add('dl','kv');n.facts.forEach(([k,v])=>{const dt=document.createElement('dt');dt.textContent=k;const dd=document.createElement('dd');dd.textContent=v;dl.append(dt,dd)});
+    const list=(title,items)=>{if(!items.length)return;add('div','tag',title).style.color='var(--muted)';const ul=add('ul');items.forEach(i=>{const li=document.createElement('li');li.textContent=i;ul.append(li)})};
+    list('Eingänge',ins);list('Ausgänge',outs);list('Nächste Schritte',n.todo);
+  }
+  document.querySelectorAll('#filters .chip').forEach(b=>b.addEventListener('click',()=>{filter=filter===b.dataset.sys?null:b.dataset.sys;applyFilter()}));
+  document.getElementById('reset').addEventListener('click',()=>{NODES.forEach(n=>{n.x=home[n.id].x;n.y=home[n.id].y;place(n)});drawLinks();try{localStorage.removeItem(KEY)}catch(e){}});
+  drawLinks();applyFilter();select(selected);
+})();
+</script>
+
+</body></html>
