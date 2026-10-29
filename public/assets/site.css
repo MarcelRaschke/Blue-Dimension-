@@ -122,6 +122,21 @@ figure.art figcaption { margin-top: 0.4rem; font-size: 0.9rem; color: var(--mute
 }
 .art-grid figure.art { margin: 0; }
 
+/* Die Artwork-Galerie mischt Hochformat (brand-binary-decoder), Quadrat
+   (logo-vinyl) und Breitbild-Banner (credit-twodivision) nebeneinander in
+   einem Grid ohne feste Zeilenhöhe – das Ergebnis sind unregelmäßig hohe
+   Kacheln. aspect-ratio: 16/9 gibt jeder Kachel dieselbe Höhe; object-fit:
+   contain statt cover, weil ein harter Zuschnitt bei genau diesen drei
+   Bildern echten Inhalt kappen würde (Logo-Zeile oben bei binary-decoder,
+   "designed by …&@®†" an beiden Rändern bei credit-twodivision). panel
+   füllt den Letterbox-Rand als bewusste "auf Karte montiert"-Fläche statt
+   als Rendering-Lücke. */
+.art-grid figure.art img {
+    aspect-ratio: 16 / 9;
+    object-fit: contain;
+    background: var(--panel);
+}
+
 @media (max-width: 480px) {
     .site-header { flex-direction: column; align-items: flex-start; }
 }
