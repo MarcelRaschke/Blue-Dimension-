@@ -4,13 +4,21 @@
  * biography). The legacy content contains inline <font>, <a>, <br> and similar
  * tags. Everything outside the allow-list is removed or unwrapped, and only
  * http(s), mailto and local links are kept.
+ *
+ * `color` and `size` on <font> are presentational attributes from the legacy
+ * dumps (e.g. <font color="#0000ff">) and are dropped here: the site's link
+ * color comes entirely from the --link design token now, so a leftover
+ * color="#0000ff" would silently fight the token the moment any stylesheet
+ * (print, reader mode, a future redesign) stops overriding presentational
+ * attributes. The <font> tag itself is kept for its structural/bold wrapping
+ * in older content.
  */
 
 declare(strict_types=1);
 
 const SANITIZE_KEEP_TAGS = ['a', 'b', 'i', 'u', 'em', 'strong', 'font', 'br', 'p', 'span', 'small'];
 const SANITIZE_DROP_TAGS = ['script', 'style', 'iframe', 'object', 'embed', 'svg', 'math', 'form', 'input', 'button', 'textarea', 'select'];
-const SANITIZE_KEEP_ATTRS = ['href', 'target', 'color', 'size'];
+const SANITIZE_KEEP_ATTRS = ['href', 'target'];
 
 /**
  * Hosts that answered over HTTPS on 2026-10-28 (HTTP 200, 301 or 302).
@@ -120,16 +128,7 @@ function sanitize_attributes(DOMElement $element): void
             continue;
         }
 
-        if ($lower === 'target') {
-            if (strtolower($value) !== '_blank') {
-                $element->removeAttribute($name);
-            }
-            continue;
-        }
-
-        if ($lower === 'color' && !preg_match('/^(#[0-9a-f]{3,6}|[a-z]{3,20})$/i', $value)) {
-            $element->removeAttribute($name);
-        } elseif ($lower === 'size' && !preg_match('/^[1-7]$/', $value)) {
+        if ($lower === 'target' && strtolower($value) !== '_blank') {
             $element->removeAttribute($name);
         }
     }
