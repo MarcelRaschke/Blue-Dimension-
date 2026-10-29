@@ -38,6 +38,20 @@ Nummerierung nach Reihenfolge der Anhänge. „Quelle“ ist der Dateiname im Up
 
 Zwei Bilder sind mit Text belegt, der für Besucher nicht gedacht ist (Nr. 11) oder für Lesbarkeit zu klein ist (Nr. 9, daher Vollbild-Link). Nr. 1 und Nr. 2 haben nur 760 Pixel Kantenlänge. Sie werden nicht hochskaliert, sondern in nativer Größe ausgeliefert.
 
+## Nachtrag: 4 weitere Bilder (Galerie)
+
+Gleiche Quelle, zweiter Upload-Ordner. Nr. 3 der 5 Anhänge (Logo J·Γ im blauen Ring) ist bildidentisch mit Nr. 13 oben (`logo-badge.webp`) und wurde nicht erneut aufgenommen.
+
+| Nr. | Quelle | Motiv | Original | Entscheidung | Web-Datei |
+| --- | --- | --- | --- | --- | --- |
+| 16 | 178b3772-image.jpg | Lego-Figuren-Illustration: Arbeitsschritte Analysieren, Studieren, Erforschen, Hypothese aufstellen, Belegen, Widerlegen, Lernen, Planen, Reparieren, Dokumentieren, Erstellen, zentriert auf djjessejay.ch | 2752×1536 | Galerie | `brand-workflow-board.webp` |
+| 17 | b82099e0-image.png | Binärcode-Tafel, dekodiert Byte für Byte „DJ Jesse Jay“ in ASCII | 2160×2700 | Galerie | `brand-binary-decoder.webp` |
+| — | 792bfc24-image.png | Logo J·Γ im blauen Ring (identisch mit Nr. 13) | 380×380 | nicht erneut aufgenommen | — |
+| 18 | 7ec057e6-image.jpg | Mitgliedskarte „DJ Jesse Jay“ mit „cy8er c0wc0d3“, djjessejay.ch, Zürich, Radio LoRa 97.5 | 760×428 | Galerie | `member-card-cy8er.webp` |
+| 19 | ae381d22-image.jpg | Foto eines Neon-Schilds „DJ Jesse Jay“ mit Logo an einer Bar-Theke | 1280×427 | Galerie | `neon-sign-venue.webp` |
+
+Nr. 16 (`brand-workflow-board`) überschritt bei Qualität 82 das 300-KB-Budget (316 KB); mit Qualität 78 liegt die Datei bei 283 KB. Siehe `QUALITY_OVERRIDES` in `scripts/build-images.py`. Die übrigen drei Bilder verwenden die Standardqualität 82. Nr. 17–19 haben keine Transparenz (Alpha durchgehend 255) und wurden wie gewohnt nach RGB konvertiert. Gesamtgewicht der 4 neuen Dateien: rund 500 KB.
+
 ## Entscheidungen
 
 Format: WebP, Qualität 82, längste Kante höchstens 1536 px. Gesamtgewicht der 13 Dateien: 1,5 MB, gegenüber 11,6 MB der Originale. Das größte Einzelbild ist 286 KB.
@@ -80,7 +94,7 @@ News: Radio LoRa 97.5 unter der Überschrift.
 Events: Poster unter der Einleitung.
 Biografie: DJ-Controller über dem Text.
 Musik: Infografik mit Vollbild-Link über der Tabelle.
-Galerie: neuer Abschnitt „Artwork“ über den Event-Fotos mit sieben Bildern.
+Galerie: neuer Abschnitt „Artwork“ über den Event-Fotos, inzwischen elf Bildern.
 Header: Logo in allen Seiten.
 
 Neue Bilder hinzufügen: Original in den Quellordner legen, Eintrag in `JOBS` ergänzen, Build ausführen, Eintrag in `IMAGES` ergänzen, Einbindung mit `figure_tag('<key>')` setzen. Die Tests schlagen fehl, bis alle Schritte erledigt sind.

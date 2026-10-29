@@ -35,7 +35,17 @@ JOBS = [
     ("7cb48743-image.png", "art-ibm370-variant", 760, 0),
     ("1a90616d-image.png", "art-signature-bridge", 1200, 0),
     ("517059db-image.jpg", "credit-twodivision", 1536, 0),
+    # Dense infographic at quality 82 cleared 300 KB; dropped to 78 to fit the budget.
+    ("178b3772-image.jpg", "brand-workflow-board", 1536, 0),
+    ("b82099e0-image.png", "brand-binary-decoder", 1536, 0),
+    ("7ec057e6-image.jpg", "member-card-cy8er", 1536, 0),
+    ("ae381d22-image.jpg", "neon-sign-venue", 1536, 0),
 ]
+
+# Per-job overrides of WEBP_QUALITY, by output name. See the JOBS comment above.
+QUALITY_OVERRIDES = {
+    "brand-workflow-board": 78,
+}
 
 # Originals that are deliberately not published. See docs/BILDER.md, "Zurückgestellt".
 HELD = {
@@ -49,14 +59,14 @@ APPLE_TOUCH_SIZE = 180
 PNG_FAVICON_SIZES = [32, 192]
 
 
-def convert(src: pathlib.Path, dst: pathlib.Path, max_edge: int, crop_bottom: int) -> tuple[int, int]:
+def convert(src: pathlib.Path, dst: pathlib.Path, max_edge: int, crop_bottom: int, quality: int = WEBP_QUALITY) -> tuple[int, int]:
     """Write one WebP file and return its final pixel size."""
     with Image.open(src) as image:
         image = image.convert("RGB")
         if crop_bottom:
             image = image.crop((0, 0, image.width, image.height - crop_bottom))
         image.thumbnail((max_edge, max_edge), Image.LANCZOS)
-        image.save(dst, "WEBP", quality=WEBP_QUALITY, method=6)
+        image.save(dst, "WEBP", quality=quality, method=6)
         return image.size
 
 
@@ -87,7 +97,7 @@ def main() -> int:
             print(f"missing source: {src}", file=sys.stderr)
             return 1
         dst = args.out / f"{name}.webp"
-        width, height = convert(src, dst, max_edge, crop_bottom)
+        width, height = convert(src, dst, max_edge, crop_bottom, QUALITY_OVERRIDES.get(name, WEBP_QUALITY))
         print(f"{dst.name:40s} {width}x{height} {dst.stat().st_size // 1024} KB")
 
     build_favicons(args.source / FAVICON_SOURCE, args.public, args.out)

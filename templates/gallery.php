@@ -18,6 +18,10 @@ render_page('Galerie', 'gallery.html', static function () use ($events): void { 
             <?= figure_tag('neon-plate', 'Progressive Music Attack') ?>
             <?= figure_tag('logo-vinyl', 'Logo') ?>
             <?= figure_tag('credit-twodivision', 'Design: TwoDivision') ?>
+            <?= figure_tag('brand-workflow-board', 'Arbeitsweise · djjessejay.ch') ?>
+            <?= figure_tag('brand-binary-decoder', 'DJ Jesse Jay · Binärcode') ?>
+            <?= figure_tag('member-card-cy8er', 'Mitgliedskarte · cy8er c0wc0d3') ?>
+            <?= figure_tag('neon-sign-venue', 'Neon-Schild · Club') ?>
         </div>
     </section>
     <?php foreach (array_reverse($events) as $event): ?>
