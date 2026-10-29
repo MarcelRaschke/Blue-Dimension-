@@ -57,6 +57,8 @@ Der Abschnitt „Artwork“ oben in der Galerie nutzt `public/assets/img/` und i
 
 Links zu Hosts aus `HTTPS_VERIFIED_HOSTS` (`app/html.php`) werden als `https://` ausgegeben. Die Liste enthält nur Hosts, die bei der letzten Prüfung über TLS geantwortet haben. Gästebuch-Texte sind Klartext und bleiben unverändert.
 
+Neue Seiten und neue Links verwenden `https://`. Ein Link mit `http://` ist nur für die Hosts in `HTTP_LEGACY_HOSTS` (`scripts/test-site.php`) erlaubt, das sind Hosts ohne TLS oder das RealMedia-Archiv auf Port 554. Jeder andere `href="http://…"` in `public/*.html` lässt `php scripts/test-site.php` fehlschlagen. Ein neuer Host gehört entweder auf https umgestellt oder, nach Prüfung, in `HTTP_LEGACY_HOSTS` aufgenommen.
+
 Autorengepflegtes HTML läuft durch `sanitize_html()`. Erlaubt sind nur die Tags `a b i u em strong font br p span small` sowie die Attribute `href target color size`. Links sind auf `http(s)`, `mailto:` und lokale Pfade beschränkt, `target="_blank"` bekommt `rel="noopener noreferrer"`. Gästebuch-Kommentare sind reiner Text und werden escaped. Die Tests in `scripts/test-site.php` prüfen das.
 
 ## Offen
