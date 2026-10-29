@@ -1,0 +1,6 @@
+{
+  "chunkSize": { "x": 256, "z": 256 },
+  "chunks": [
+    { "row": 64, "col": 0, "url": "/chunks/chunk_r00064_c00000.glb" }
+  ]
+}

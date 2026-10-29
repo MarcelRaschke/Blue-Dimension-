@@ -143,6 +143,24 @@ services:
       retries: 3
       start_period: 15s
 
+  # Chunk Viewer (Three.js + Nginx)
+  chunk-viewer:
+    build:
+      context: ./performance-system/chunk-viewer
+      dockerfile: Dockerfile
+    container_name: blue-dimension-chunk-viewer
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    networks:
+      - blue-dimension
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
 networks:
   blue-dimension:
     driver: bridge
