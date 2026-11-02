@@ -88,21 +88,12 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_KEY }}
           REMOTE_HOST: ${{ secrets.DEPLOY_HOST }}
           REMOTE_USER: ${{ secrets.DEPLOY_USER }}
+          SOURCE_DIR: ./public/
           REMOTE_PATH: /home/${{ secrets.DEPLOY_USER }}/public_html/
           ARGS: "-avz --delete --checksum"
           EXCLUDE: |
             .git/
             .github/
-            node_modules/
-            vendor/
-            .env
-            .env.local
-            *.swp
-            *.swo
-            *~
-            .DS_Store
-            npm-debug.log
-            package-lock.json
 
       - name: Verify deployment health
         id: verify

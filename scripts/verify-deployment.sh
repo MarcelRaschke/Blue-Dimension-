@@ -12,6 +12,7 @@ RETRY_DELAY=1  # seconds - faster retry with optimized health endpoints (<50ms t
 TIMEOUT=10
 HEALTH_ENDPOINT="${DEPLOY_URL}/"
 DETAILED_ENDPOINT="${DEPLOY_URL}/news.html"
+PIXEL2VOXEL_ENDPOINT="${DEPLOY_URL}/pixel2voxel"
 
 echo "Starting post-deployment verification..."
 echo "Target: $DEPLOY_URL"
@@ -49,6 +50,8 @@ echo ""
 check_health "$HEALTH_ENDPOINT" "Simple health check" || exit 1
 echo ""
 check_health "$DETAILED_ENDPOINT" "Detailed health check" || exit 1
+echo ""
+check_health "$PIXEL2VOXEL_ENDPOINT" "Pixel2Voxel Tokenizer" || exit 1
 
 echo ""
 echo "✓ Deployment verification successful!"

@@ -69,26 +69,15 @@ After merge to `main`:
 
 ---
 
-## Webroot klären (offen)
+## Webroot — gelöst
 
-Stand: Die Auslieferung ist seit dem Umbau statisch. Der Deploy-Workflow kopiert das gesamte Repository per rsync mit `--delete` nach `public_html` auf dem Server. Welcher Ordner der Webserver tatsächlich ausliefert, steht nicht im Repository.
+`deploy.yml` setzt `SOURCE_DIR: ./public/` im SFTP-Schritt. Damit landet nur der Inhalt von `public/` (HTML, Assets, Favicon) in `public_html/` auf dem Server — keine Templates, App-Logik oder Scripts.
 
-Die Automatik ist deshalb pausiert (`deploy.yml` startet nur noch manuell). Vor der Wiederaktivierung auf dem Server prüfen:
+Bevor der Auto-Deploy von `workflow_dispatch` zurück auf `push` zu `main` gestellt wird:
 
-```
-# Nginx
-sudo nginx -T 2>/dev/null | grep -n "server_name\|root "
-
-# Apache
-sudo apachectl -S 2>/dev/null | head -20
-sudo grep -rn "DocumentRoot" /etc/apache2/sites-enabled/
-```
-
-Danach festlegen:
-
-1. Ausgeliefert werden nur `public/*.html`, `public/assets/` und `public/favicon.ico`. `templates/`, `app/`, `content/` und `scripts/` gehören nicht in den Webroot.
-2. Der rsync-Schritt muss den Inhalt von `public/` in den tatsächlichen Webroot kopieren, nicht das Repository-Root.
-3. Erst nach einer Probe-Auslieferung (`scripts/verify-deployment.sh`) den Auto-Deploy auf `push` zu `main` zurücksetzen.
+1. Eine manuelle Deploy-Run auslösen und `scripts/verify-deployment.sh https://djjessejay.ch` prüfen — alle drei Endpunkte (`/`, `/news`, `/pixel2voxel`) müssen HTTP 200 liefern.
+2. SSH-Host-Schlüssel als Secret hinterlegen (siehe Abschnitt unten).
+3. Erst dann `on: workflow_dispatch` in `deploy.yml` auf `on: push: branches: [main]` ändern.
 
 ## Host-Schlüssel hinterlegen
 
