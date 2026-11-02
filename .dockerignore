@@ -73,6 +73,9 @@ README*
 ehthumbs.db
 
 # Backup/Archive
+# Original media (not served; RadioStudio.mov alone is 21 MB). Docker sends the
+# whole context to the daemon, so this keeps the build context small.
+archiv/
 *.bak
 *.backup
 *.tar.gz
