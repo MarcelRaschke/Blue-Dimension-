@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pixel2Voxel Tokenizer · DJ Jesse Jay</title>
+    <meta name="description" content="Blue Dimension Pixel2Voxel — Bild-Tokenizer: Pixel zu Voxel-Gitter, interaktive 3D-Darstellung.">
+    <link rel="stylesheet" href="assets/site.css">
+    <script src="assets/js/htmx.min.js" defer></script>
+    <link rel="icon" href="favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/img/favicon-192.png">
+    <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+    <style>
+        :root {
+            --neon-yellow: #f5c400;
+        }
+
+        .p2v-main {
+            padding: 1rem 16px 2rem;
+        }
+
+        .p2v-hero {
+            margin-bottom: 1.25rem;
+        }
+
+        .p2v-hero h1 {
+            margin: 0 0 0.25rem;
+            font-size: clamp(1.4rem, 4vw, 2rem);
+        }
+
+        .p2v-hero p {
+            margin: 0;
+            color: var(--neon-cyan);
+            font-size: 0.95rem;
+            letter-spacing: 0.06em;
+        }
+
+        .p2v-layout {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 1rem;
+            height: calc(100svh - 220px);
+            min-height: 420px;
+        }
+
+        /* ── controls panel ── */
+        .p2v-panel {
+            background: var(--panel);
+            border: 1px solid var(--neon-cyan);
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            overflow-y: auto;
+        }
+
+        .p2v-panel h2 {
+            margin: 0 0 0.25rem;
+            font-size: 0.75rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--neon-cyan);
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--neon-pink);
+            border-radius: 6px;
+            padding: 0.75rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--muted);
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .drop-zone.drag-over {
+            border-color: var(--neon-cyan);
+            background: rgba(46, 242, 255, 0.07);
+        }
+
+        .drop-zone input[type="file"] {
+            display: none;
+        }
+
+        .ctrl-row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .ctrl-row label {
+            font-size: 0.78rem;
+            color: var(--muted);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .ctrl-row label span {
+            color: var(--neon-yellow);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .ctrl-row input[type="range"] {
+            width: 100%;
+            accent-color: var(--neon-cyan);
+        }
+
+        .ctrl-row select {
+            width: 100%;
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--neon-cyan);
+            border-radius: 4px;
+            padding: 0.3rem 0.5rem;
+            font-size: 0.82rem;
+        }
+
+        .ctrl-check {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.82rem;
+            cursor: pointer;
+        }
+
+        .ctrl-check input[type="checkbox"] {
+            accent-color: var(--neon-pink);
+            width: 15px;
+            height: 15px;
+        }
+
+        .p2v-btn {
+            background: transparent;
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            border-radius: 4px;
+            padding: 0.4rem 0.6rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            letter-spacing: 0.05em;
+            transition: background 0.15s;
+        }
+
+        .p2v-btn:hover {
+            background: rgba(46, 242, 255, 0.12);
+        }
+
+        .p2v-btn.pink {
+            border-color: var(--neon-pink);
+            color: var(--neon-pink);
+        }
+
+        .p2v-btn.pink:hover {
+            background: rgba(255, 46, 154, 0.12);
+        }
+
+        .stats-block {
+            font-size: 0.75rem;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .stats-block strong {
+            color: var(--neon-yellow);
+        }
+
+        /* ── 3D viewport ── */
+        .p2v-viewport {
+            position: relative;
+            border: 1px solid var(--panel);
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--bg);
+        }
+
+        .p2v-viewport canvas {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .p2v-hint {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            font-size: 0.9rem;
+            pointer-events: none;
+            gap: 0.5rem;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .p2v-hint svg {
+            opacity: 0.35;
+        }
+
+        .p2v-hint.hidden {
+            display: none;
+        }
+
+        .hud-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 0.3rem 0.75rem;
+            background: rgba(11, 7, 22, 0.7);
+            font-size: 0.7rem;
+            color: var(--muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .hud-bar span { color: var(--neon-cyan); }
+
+        @media (max-width: 640px) {
+            .p2v-layout {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+                height: auto;
+            }
+
+            .p2v-viewport {
+                height: 55svh;
+                min-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+<header class="site-header">
+    <a class="brand" href="index.html">
+        <img src="assets/img/logo-badge.webp" width="256" height="256" alt="" class="brand-logo" loading="eager" decoding="async">
+        <span>DJ Jesse Jay</span>
+    </a>
+    <nav class="site-nav" aria-label="Hauptnavigation">
+        <a href="index.html">Start</a>
+        <a href="biography.html">Biografie</a>
+        <a href="news.html">News</a>
+        <a href="events.html">Events</a>
+        <a href="music.html">Musik</a>
+        <a href="gallery.html">Galerie</a>
+        <a href="links.html">Links</a>
+        <a href="gbook.html">Gästebuch</a>
+        <a href="pixel2voxel.html" aria-current="page">Pixel2Voxel</a>
+    </nav>
+</header>
+
+<main class="p2v-main">
+    <div class="p2v-hero">
+        <h1>Pixel2Voxel Tokenizer</h1>
+        <p>Blue Dimension &middot; Bild zu Voxel-Gitter &middot; 3D Tokenisierung</p>
+    </div>
+
+    <div class="p2v-layout">
+        <!-- Controls -->
+        <aside class="p2v-panel" aria-label="Tokenizer-Steuerung">
+            <div>
+                <h2>Bild</h2>
+                <div class="drop-zone" id="dropZone" role="button" tabindex="0" aria-label="Bild per Drag and Drop oder Klick laden">
+                    <input type="file" id="imgInput" accept="image/*">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 0.4rem; display: block;">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    <div>Bild laden</div>
+                    <div style="font-size:0.7rem; margin-top: 0.2rem;">oder hier klicken</div>
+                </div>
+            </div>
+
+            <div>
+                <h2>Gitter</h2>
+                <div class="ctrl-row">
+                    <label>Auflösung <span id="gridVal">32</span></label>
+                    <input type="range" id="gridN" min="8" max="96" step="4" value="32">
+                </div>
+                <div class="ctrl-row">
+                    <label>Tiefe (Extrusion) <span id="depthVal">8</span></label>
+                    <input type="range" id="depth" min="1" max="40" value="8">
+                </div>
+                <div class="ctrl-row">
+                    <label>Voxel-Abstand <span id="gapVal">0.06</span></label>
+                    <input type="range" id="gap" min="0" max="0.45" step="0.01" value="0.06">
+                </div>
+            </div>
+
+            <div>
+                <h2>Farbe</h2>
+                <div class="ctrl-row">
+                    <label style="display:block; margin-bottom:0.2rem;">Palette</label>
+                    <select id="palette">
+                        <option value="original">Original RGB</option>
+                        <option value="neon">Neon Blue Dimension</option>
+                        <option value="gray">Graustufen</option>
+                        <option value="thermal">Thermal</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <h2>Ansicht</h2>
+                <label class="ctrl-check">
+                    <input type="checkbox" id="autoRot" checked>
+                    Auto-Rotation
+                </label>
+                <label class="ctrl-check" style="margin-top:0.4rem;">
+                    <input type="checkbox" id="showGrid" checked>
+                    Boden-Gitter
+                </label>
+                <label class="ctrl-check" style="margin-top:0.4rem;">
+                    <input type="checkbox" id="wireframe">
+                    Wireframe
+                </label>
+            </div>
+
+            <div>
+                <h2>Export</h2>
+                <button class="p2v-btn" id="exportJson">JSON Token-Array</button>
+                <button class="p2v-btn pink" id="exportPng" style="margin-top:0.4rem;">Screenshot</button>
+            </div>
+
+            <div class="stats-block" id="statsBlock">
+                <div>Token-Array: <strong id="stTok">—</strong></div>
+                <div>Gitter: <strong id="stGrid">—</strong></div>
+                <div>Voxel: <strong id="stVox">—</strong></div>
+            </div>
+        </aside>
+
+        <!-- 3D Viewport -->
+        <div class="p2v-viewport" id="viewport">
+            <div class="p2v-hint" id="hint">
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--neon-cyan)" stroke-width="1">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <span style="color: var(--text);">Bild laden um Tokenisierung zu starten</span>
+                <span style="font-size:0.8rem;">Drag &amp; Drop oder Panel links</span>
+            </div>
+            <div class="hud-bar" id="hudBar" style="display:none;">
+                <span id="hudLabel">—</span>
+                <span style="color:var(--muted);">Ziehen: Orbit &middot; Scroll: Zoom &middot; Rechts: Pan</span>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer class="site-footer">
+    <div class="footer-inner">
+        <img src="assets/img/logo-badge.webp" width="256" height="256" alt="" class="footer-logo" loading="lazy" decoding="async">
+        <div>
+            <p>DJ Jesse Jay &middot; since 1997 the progressive music attack</p>
+            <p class="muted">Radio LoRa 97.5 &middot; Blue Dimension &middot; Zürich</p>
+            <p class="muted">Design: TwoDivision</p>
+        </div>
+    </div>
+</footer>
+
+<!-- Three.js r128 (global build) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- OrbitControls for r128 -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+(function () {
+    'use strict';
+
+    // ── State ──────────────────────────────────────────────────────────────
+    let scene, camera, renderer, controls;
+    let voxelMesh = null;
+    let gridHelper = null;
+    let currentTokens = [];
+    let currentGridN = 32;
+    let currentImg = null;
+    let animId = null;
+
+    const NEON_CYAN   = new THREE.Color(0x2ef2ff);
+    const NEON_PINK   = new THREE.Color(0xff2e9a);
+    const NEON_YELLOW = new THREE.Color(0xf5c400);
+
+    // ── DOM refs ───────────────────────────────────────────────────────────
+    const vp        = document.getElementById('viewport');
+    const hint      = document.getElementById('hint');
+    const hudBar    = document.getElementById('hudBar');
+    const hudLabel  = document.getElementById('hudLabel');
+    const gridNEl   = document.getElementById('gridN');
+    const depthEl   = document.getElementById('depth');
+    const gapEl     = document.getElementById('gap');
+    const paletteEl = document.getElementById('palette');
+    const autoRotEl = document.getElementById('autoRot');
+    const showGridEl= document.getElementById('showGrid');
+    const wireEl    = document.getElementById('wireframe');
+    const gridVal   = document.getElementById('gridVal');
+    const depthVal  = document.getElementById('depthVal');
+    const gapVal    = document.getElementById('gapVal');
+    const stTok     = document.getElementById('stTok');
+    const stGrid    = document.getElementById('stGrid');
+    const stVox     = document.getElementById('stVox');
+    const dropZone  = document.getElementById('dropZone');
+    const imgInput  = document.getElementById('imgInput');
+
+    // ── Three.js init ──────────────────────────────────────────────────────
+    function initThree() {
+        renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setClearColor(0x0b0716);
+        renderer.shadowMap.enabled = false;
+        vp.appendChild(renderer.domElement);
+
+        scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x0b0716, 0.004);
+
+        camera = new THREE.PerspectiveCamera(45, 1, 0.1, 2000);
+        camera.position.set(50, 35, 50);
+
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.08;
+        controls.minDistance = 5;
+        controls.maxDistance = 400;
+
+        // Lights
+        const amb = new THREE.AmbientLight(0x334466, 0.8);
+        scene.add(amb);
+
+        const key = new THREE.DirectionalLight(0xffffff, 0.9);
+        key.position.set(60, 80, 40);
+        scene.add(key);
+
+        const fill = new THREE.PointLight(0x2ef2ff, 0.6, 300);
+        fill.position.set(-40, 30, -40);
+        scene.add(fill);
+
+        const rim = new THREE.PointLight(0xff2e9a, 0.4, 300);
+        rim.position.set(40, -10, 60);
+        scene.add(rim);
+
+        // Floor grid
+        gridHelper = new THREE.GridHelper(128, 64, 0x1a3040, 0x0f1e28);
+        gridHelper.position.y = -0.5;
+        scene.add(gridHelper);
+
+        resize();
+        window.addEventListener('resize', resize);
+        animate();
+    }
+
+    function resize() {
+        const w = vp.clientWidth;
+        const h = vp.clientHeight;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+    }
+
+    function animate() {
+        animId = requestAnimationFrame(animate);
+        if (autoRotEl.checked && voxelMesh) {
+            voxelMesh.rotation.y += 0.0025;
+        }
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+    // ── Tokenizer ──────────────────────────────────────────────────────────
+    // Returns array of tokens: { id, gx, gy, r, g, b, h }
+    // h = luminance [0..1], used as voxel height
+    function tokenize(img, gridN) {
+        const offscreen = document.createElement('canvas');
+        offscreen.width  = gridN;
+        offscreen.height = gridN;
+        const ctx = offscreen.getContext('2d');
+        ctx.drawImage(img, 0, 0, gridN, gridN);
+        const px = ctx.getImageData(0, 0, gridN, gridN).data;
+
+        const toks = [];
+        for (let gy = 0; gy < gridN; gy++) {
+            for (let gx = 0; gx < gridN; gx++) {
+                const i = (gy * gridN + gx) * 4;
+                const r = px[i]   / 255;
+                const g = px[i+1] / 255;
+                const b = px[i+2] / 255;
+                const a = px[i+3] / 255;
+                const h = (0.299*r + 0.587*g + 0.114*b) * a;
+                toks.push({ id: gy*gridN+gx, gx, gy, r, g, b, h });
+            }
+        }
+        return toks;
+    }
+
+    // ── Palette mapping ────────────────────────────────────────────────────
+    const col = new THREE.Color();
+
+    function applyPalette(tok, mode) {
+        switch (mode) {
+            case 'neon': {
+                // Map luminance to cyan→pink gradient
+                const t = tok.h;
+                col.lerpColors(NEON_CYAN, NEON_PINK, t);
+                break;
+            }
+            case 'gray':
+                col.setRGB(tok.h, tok.h, tok.h);
+                break;
+            case 'thermal': {
+                // Black→blue→cyan→green→yellow→red
+                const t = tok.h;
+                if      (t < 0.25) col.lerpColors(new THREE.Color(0x000044), new THREE.Color(0x0044ff), t / 0.25);
+                else if (t < 0.5)  col.lerpColors(new THREE.Color(0x0044ff), new THREE.Color(0x00ffcc), (t-0.25)/0.25);
+                else if (t < 0.75) col.lerpColors(new THREE.Color(0x00ffcc), new THREE.Color(0xffcc00), (t-0.5)/0.25);
+                else               col.lerpColors(new THREE.Color(0xffcc00), new THREE.Color(0xff2200), (t-0.75)/0.25);
+                break;
+            }
+            default: // original
+                col.setRGB(tok.r, tok.g, tok.b);
+        }
+        return col;
+    }
+
+    // ── Build InstancedMesh from tokens ───────────────────────────────────
+    function buildVoxels(toks, gridN, depth, gap, palette, wireframe) {
+        // Tear down previous mesh
+        if (voxelMesh) {
+            scene.remove(voxelMesh);
+            voxelMesh.geometry.dispose();
+            voxelMesh.material.dispose();
+            voxelMesh = null;
+        }
+
+        const voxSize = 1 - gap;
+        const geo = new THREE.BoxGeometry(voxSize, 1, voxSize);
+        const mat = new THREE.MeshStandardMaterial({
+            vertexColors: true,
+            roughness: 0.55,
+            metalness: 0.2,
+            wireframe: wireframe
+        });
+
+        const count = toks.length;
+        voxelMesh = new THREE.InstancedMesh(geo, mat, count);
+        voxelMesh.castShadow = false;
+
+        const dummy = new THREE.Object3D();
+        const half  = gridN / 2;
+
+        toks.forEach((tok, i) => {
+            const h      = tok.h;
+            const towers = Math.max(h * depth, 0.05);
+            dummy.position.set(tok.gx - half + 0.5, towers * 0.5, -(tok.gy - half + 0.5));
+            dummy.scale.set(1, towers, 1);
+            dummy.updateMatrix();
+            voxelMesh.setMatrixAt(i, dummy.matrix);
+            applyPalette(tok, palette);
+            // Darken low-luma voxels slightly so the grid reads well
+            const bright = 0.4 + tok.h * 0.6;
+            col.multiplyScalar(bright);
+            voxelMesh.setColorAt(i, col);
+        });
+
+        voxelMesh.instanceMatrix.needsUpdate = true;
+        if (voxelMesh.instanceColor) voxelMesh.instanceColor.needsUpdate = true;
+
+        scene.add(voxelMesh);
+
+        // Reposition camera to frame the scene
+        const farEdge = gridN * 0.85;
+        camera.position.set(farEdge, farEdge * 0.6, farEdge);
+        controls.target.set(0, depth * 0.25, 0);
+        controls.update();
+
+        // HUD
+        hudBar.style.display = 'flex';
+        hudLabel.textContent = `${gridN}×${gridN} · ${count} Token · Tiefe ${depth}`;
+
+        // Stats
+        stTok.textContent  = count.toLocaleString('de-CH');
+        stGrid.textContent = `${gridN} × ${gridN}`;
+        stVox.textContent  = `${count} Voxel`;
+    }
+
+    // ── Rebuild from current image ─────────────────────────────────────────
+    function rebuild() {
+        if (!currentImg) return;
+        const gridN   = parseInt(gridNEl.value);
+        const depth   = parseInt(depthEl.value);
+        const gap     = parseFloat(gapEl.value);
+        const palette = paletteEl.value;
+        const wire    = wireEl.checked;
+
+        currentGridN  = gridN;
+        currentTokens = tokenize(currentImg, gridN);
+        buildVoxels(currentTokens, gridN, depth, gap, palette, wire);
+
+        hint.classList.add('hidden');
+    }
+
+    // ── Image loading ──────────────────────────────────────────────────────
+    function loadImage(file) {
+        if (!file || !file.type.startsWith('image/')) return;
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+            currentImg = img;
+            URL.revokeObjectURL(url);
+            rebuild();
+        };
+        img.src = url;
+    }
+
+    // ── Drop zone ──────────────────────────────────────────────────────────
+    dropZone.addEventListener('click', () => imgInput.click());
+    dropZone.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') imgInput.click(); });
+    imgInput.addEventListener('change', () => loadImage(imgInput.files[0]));
+
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        loadImage(e.dataTransfer.files[0]);
+    });
+
+    // Also allow drop on viewport
+    vp.addEventListener('dragover', e => e.preventDefault());
+    vp.addEventListener('drop', e => { e.preventDefault(); loadImage(e.dataTransfer.files[0]); });
+
+    // ── Control listeners ──────────────────────────────────────────────────
+    gridNEl.addEventListener('input', () => {
+        gridVal.textContent = gridNEl.value;
+        rebuild();
+    });
+    depthEl.addEventListener('input', () => {
+        depthVal.textContent = depthEl.value;
+        rebuild();
+    });
+    gapEl.addEventListener('input', () => {
+        gapVal.textContent = parseFloat(gapEl.value).toFixed(2);
+        rebuild();
+    });
+    paletteEl.addEventListener('change', () => rebuild());
+    wireEl.addEventListener('change', () => {
+        if (voxelMesh) voxelMesh.material.wireframe = wireEl.checked;
+    });
+    showGridEl.addEventListener('change', () => {
+        if (gridHelper) gridHelper.visible = showGridEl.checked;
+    });
+
+    // ── Export JSON ────────────────────────────────────────────────────────
+    document.getElementById('exportJson').addEventListener('click', () => {
+        if (!currentTokens.length) { alert('Kein Bild geladen.'); return; }
+
+        const out = {
+            meta: {
+                generator: 'Blue Dimension Pixel2Voxel Tokenizer',
+                gridN: currentGridN,
+                depth: parseInt(depthEl.value),
+                palette: paletteEl.value,
+                count: currentTokens.length,
+                ts: new Date().toISOString()
+            },
+            tokens: currentTokens.map(t => ({
+                id: t.id,
+                gx: t.gx,
+                gy: t.gy,
+                r: +t.r.toFixed(4),
+                g: +t.g.toFixed(4),
+                b: +t.b.toFixed(4),
+                h: +t.h.toFixed(4)
+            }))
+        };
+
+        const blob = new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `p2v-tokens-${currentGridN}x${currentGridN}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+    });
+
+    // ── Screenshot ────────────────────────────────────────────────────────
+    document.getElementById('exportPng').addEventListener('click', () => {
+        renderer.render(scene, camera); // force fresh frame
+        const a = document.createElement('a');
+        a.href = renderer.domElement.toDataURL('image/png');
+        a.download = `p2v-screenshot-${currentGridN}x${currentGridN}.png`;
+        a.click();
+    });
+
+    // ── Boot ──────────────────────────────────────────────────────────────
+    initThree();
+
+})();
+</script>
+</body>
+</html>
