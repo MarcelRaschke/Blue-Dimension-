@@ -372,10 +372,9 @@
     </div>
 </footer>
 
-<!-- Three.js r128 (global build) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<!-- OrbitControls for r128 -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<!-- Three.js r128 + OrbitControls — bundled locally, no CDN dependency -->
+<script src="assets/js/three.min.js"></script>
+<script src="assets/js/OrbitControls.js"></script>
 
 <script>
 (function () {
@@ -390,9 +389,8 @@
     let currentImg = null;
     let animId = null;
 
-    const NEON_CYAN   = new THREE.Color(0x2ef2ff);
-    const NEON_PINK   = new THREE.Color(0xff2e9a);
-    const NEON_YELLOW = new THREE.Color(0xf5c400);
+    const NEON_CYAN = new THREE.Color(0x2ef2ff);
+    const NEON_PINK = new THREE.Color(0xff2e9a);
 
     // ── DOM refs ───────────────────────────────────────────────────────────
     const vp        = document.getElementById('viewport');
