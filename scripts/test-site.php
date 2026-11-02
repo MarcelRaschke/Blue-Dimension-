@@ -94,7 +94,9 @@ $_GET = [];
 require __DIR__ . '/../templates/gbook.php';
 $gbookHtml = (string) ob_get_clean();
 check('gbook output contains no mailto', !str_contains($gbookHtml, 'mailto:'));
-check('gbook output escapes markup', !str_contains($gbookHtml, '<script'));
+// The layout loads htmx with its own <script> tag, so only the page content is checked.
+preg_match('#<main.*</main>#s', $gbookHtml, $gbookMain);
+check('gbook output escapes markup', !str_contains($gbookMain[0] ?? '', '<script'));
 
 // 5. Images: manifest matches the files, budget holds, every image is used.
 $imageDir = __DIR__ . '/../public/assets/img';
