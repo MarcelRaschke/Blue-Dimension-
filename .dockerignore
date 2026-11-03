@@ -84,3 +84,11 @@ archiv/
 
 # Performance system (separate Docker setup)
 performance-system/
+
+# Legacy media at repo root: not served (Dockerfile only COPYs public/), but
+# ~28 MB of the ~30 MB build context without this entry (docs/BILDER.md).
+# Slows every `docker build .` (build-and-push-image.yml, test-docker-setup.yml,
+# Render autoDeploy) for bytes that never reach the image.
+RadioStudio.mov
+DJPult.gif
+JesseJayBanner.mov

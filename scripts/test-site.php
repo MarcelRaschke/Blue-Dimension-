@@ -29,7 +29,7 @@ $dirty = '<font color="#0000ff"><a href="http://www.123galaxy.ch">Galaxy</a></fo
     . '<div onclick="x()">d</div><iframe src="https://evil.example"></iframe>';
 $clean = sanitize_html($dirty);
 check('sanitize keeps safe link', str_contains($clean, 'href="http://www.123galaxy.ch"'), $clean);
-check('sanitize keeps font color', str_contains($clean, 'color="#0000ff"'), $clean);
+check('sanitize drops font color (link color comes from the --link token)', !str_contains($clean, 'color="#0000ff"'), $clean);
 check('sanitize removes script', !str_contains(strtolower($clean), '<script'), $clean);
 check('sanitize removes img and onerror', !str_contains(strtolower($clean), 'onerror') && !str_contains(strtolower($clean), '<img'), $clean);
 check('sanitize removes javascript: href', !str_contains(strtolower($clean), 'javascript:'), $clean);
