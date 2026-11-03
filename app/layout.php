@@ -14,6 +14,7 @@ const NAV_ITEMS = [
     'gallery.html' => 'Galerie',
     'links.html' => 'Links',
     'gbook.html' => 'Gästebuch',
+    'pixel2voxel.html' => 'Pixel2Voxel',
 ];
 
 /**
