@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Neon Signal · Canvas Background</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#030411;color:#e4e8ff;font-family:system-ui,sans-serif}#signal{position:fixed;inset:0;width:100%;height:100%;pointer-events:none} .controls{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:18px;padding:12px 16px;background:#080b22c9;border:1px solid #8f87ff38;border-radius:16px;backdrop-filter:blur(18px);font-size:12px;max-width:calc(100% - 24px);flex-wrap:wrap;justify-content:center}label{display:flex;gap:8px;align-items:center}input{width:90px;accent-color:#9e79ff}button{background:#252341;border:1px solid #9893ff45;color:inherit;border-radius:9px;padding:8px 12px;cursor:pointer}button:focus-visible,input:focus-visible{outline:2px solid #72eaff;outline-offset:4px}#show{position:fixed;bottom:16px;right:16px;opacity:.45} [hidden]{display:none!important}@media(max-width:480px){.controls{gap:9px}input{width:65px}}
+</style>
+</head><body>
+<!-- Reuse: copy canvas, its CSS and the script. Add ?clean=1 for an unobstructed background. Synthetic motion, no microphone or audio access. -->
+<canvas id="signal" aria-label="Animierte violette und cyanfarbene Signalwellen"></canvas>
+<!-- Steuerleiste: htmx lädt sie aus neon-wave/controls.html und tauscht sie beim Ausblenden gegen neon-wave/show.html. -->
+<div id="controls-slot" hx-get="neon-wave/controls.html" hx-trigger="load" hx-swap="outerHTML"></div>
+<script src="assets/js/htmx.min.js"></script>
+<script>
+'use strict';
+// ?clean=1 keeps the control bar out of the DOM, so htmx never requests it.
+if (new URLSearchParams(location.search).get('clean') === '1') document.getElementById('controls-slot').remove();
+</script>
+<script>
+'use strict';
+(()=>{
+const canvas=document.getElementById('signal'),ctx=canvas.getContext('2d',{alpha:false});
+const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+let w=0,h=0,scale=1,time=0,last=0,raf=0,playing=!reduced.matches;
+const colors=['#637bff','#9561ff','#cc50fa','#64dfff','#8064ee','#b83cde'];
+// Steuerwerte liegen in der Steuerleiste (htmx-Fragment). Lesen bei Bedarf, damit ein Austausch der Leiste nichts bricht.
+const val=(id,fallback)=>{const el=document.getElementById(id);return el?Number(el.value):fallback};
+function resize(){const dpr=Math.min(devicePixelRatio||1,1.5);w=innerWidth;h=innerHeight;canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);scale=Math.max(w/1536,h/857);draw();}
+function wave(x,l,t){return Math.sin(x*.005+l*1.73-t*.43)*21+Math.sin(x*.011-l*.8+t*.31)*12+Math.sin(x*.0023+l+t*.2)*34;}
+function y(x,l,t){return l*72-170-x*.39+wave(x,l,t);}
+function draw(){
+ctx.fillStyle='#030411';ctx.fillRect(0,0,w,h);ctx.save();ctx.translate(w/2,h/2);ctx.scale(scale,scale);ctx.translate(-768,-428.5);
+const ambient=ctx.createRadialGradient(1000,480,30,900,430,1000);ambient.addColorStop(0,'#170b37');ambient.addColorStop(1,'#030411');ctx.fillStyle=ambient;ctx.fillRect(-1600,-1600,4700,4000);
+const a=val('energy',1),t=time;
+ctx.globalCompositeOperation='lighter';
+for(let l=0;l<27;l++){
+ const color=colors[l%colors.length];ctx.strokeStyle=color;
+ // Bundled, diagonally receding filaments.
+ for(let strand=0;strand<5;strand++){
+ ctx.globalAlpha=(strand===2?.46:.13)*a;ctx.lineWidth=strand===2?1.55:.8;ctx.beginPath();
+ for(let x=-420;x<2000;x+=9){const py=y(x,l,t)+strand*6+Math.sin(x*.009+l+t*.15)*strand*1.7;if(x===-420)ctx.moveTo(x,py);else ctx.lineTo(x,py);}ctx.stroke();
+ }
+ // Smooth deterministic spectrum clusters, kept on the same wave surface.
+ ctx.globalAlpha=.43*a;ctx.lineWidth=1.65;ctx.beginPath();
+ for(let x=-420;x<2000;x+=5){
+ const cluster=Math.pow(Math.max(0,Math.sin(x*.010+l*2.13-t*.23)),7);
+ const noise=.25+.75*Math.pow(Math.sin(x*1.91+l*9.3),2);
+ const pulse=.55+.45*Math.sin(x*.027-l+t*.65)**2;
+ const height=(3+cluster*(35+55*pulse)*noise)*a;
+ const base=y(x,l,t)-5;ctx.moveTo(x,base);ctx.lineTo(x,base-height);
+ }ctx.stroke();
+ // Travelling light beads, with radial bloom instead of expensive full-frame blur.
+ for(let p=0;p<3;p++){
+ const x=((p*803+l*149+t*(42+l%4*9))%2400)-420,py=y(x,l,t)+12;
+ const bloom=ctx.createRadialGradient(x,py,0,x,py,26);bloom.addColorStop(0,'#e6faff');bloom.addColorStop(.09,color);bloom.addColorStop(1,'transparent');ctx.globalAlpha=.65*a;ctx.fillStyle=bloom;ctx.fillRect(x-26,py-26,52,52);
+ ctx.fillStyle='#ecfbff';ctx.globalAlpha=.85;ctx.beginPath();ctx.ellipse(x,py,3,1.4,-.4,0,Math.PI*2);ctx.fill();
+ }
+}
+ctx.restore();ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+const vignette=ctx.createRadialGradient(w*.52,h*.48,Math.min(w,h)*.16,w*.5,h*.5,Math.max(w,h)*.7);vignette.addColorStop(0,'transparent');vignette.addColorStop(1,'#02020ba8');ctx.fillStyle=vignette;ctx.fillRect(0,0,w,h);
+}
+function frame(now){raf=0;if(!playing||document.hidden)return;const dt=last?Math.min((now-last)/1000,.05):0;last=now;time+=dt*val('speed',.65);draw();raf=requestAnimationFrame(frame);}
+function sync(){cancelAnimationFrame(raf);raf=0;last=0;const pause=document.getElementById('pause');if(pause){pause.textContent=playing?'Pause':'Start';pause.setAttribute('aria-pressed',String(!playing));}if(playing&&!document.hidden)raf=requestAnimationFrame(frame);else draw();}
+// Delegation: the control bar is replaced by htmx, so bind to the document, not to elements.
+document.addEventListener('click',e=>{
+ if(e.target.closest('#pause')){playing=!playing;sync();}
+});
+document.addEventListener('input',e=>{if(e.target.id==='energy'&&!playing)draw();});
+document.addEventListener('keydown',e=>{if(e.target instanceof HTMLInputElement)return;if(e.key.toLowerCase()==='h'){const b=document.querySelector('#hide, #show');if(b)b.click();}});
+// After every swap, the new buttons need the current play state.
+document.addEventListener('htmx:afterSettle',sync);
+document.addEventListener('visibilitychange',sync);
+addEventListener('resize',resize);reduced.addEventListener('change',e=>{playing=!e.matches;sync();});
+resize();sync();
+})();
+</script></body></html>
