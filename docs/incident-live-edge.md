@@ -311,7 +311,7 @@ Trigger-Umstellung).
 |---|---|---|---|---|
 | 1 | Entscheidungs-Gate beantworten (Abschnitt 8) | — | Repo-Owner | nichts |
 | 2 | `DEPLOY_KNOWN_HOSTS` generieren + Fingerabdruck abgleichen | B, 10.1 | Repo-Owner | nichts |
-| 3 | Workflow-Snippet aus 10.2 als PR | B | Claude (auf Zuruf) | Schritt 2 für den echten Test, PR selbst nicht |
+| 3 | Workflow-Snippet aus 10.2 als PR — ✅ erledigt | B | Claude (auf Zuruf) | Schritt 2 für den echten Test, PR selbst nicht |
 | 4 | Verifikation (10.3, Schritt 3) | B | Repo-Owner oder Claude mit Freigabe | Schritt 2+3 |
 | 5 | Auto-Deploy scharfschalten (10.3, Schritt 4) | B | Repo-Owner | Schritt 4 grün |
 | 6 | Cloudflare-Repo identifizieren | A | Repo-Owner | nichts |
@@ -323,4 +323,4 @@ ausschliesslich Code, der bereits in diesem Repo liegt.
 
 ---
 
-_Letzte Aktualisierung: 2026-11-05 — Abschnitte 6–11 (Spec) ergänzt; Abschnitte 1–5 unverändert aus der vorherigen Session übernommen. Diese Datei wurde nur lokal ins Repo geschrieben, nicht veröffentlicht._
+_Letzte Aktualisierung: 2026-11-06 — Schritt 3 (Abschnitt 11) umgesetzt: `DEPLOY_KNOWN_HOSTS` in `deploy.yml` verdrahtet. Abschnitte 6–11 (Spec) am 2026-11-05 ergänzt; Abschnitte 1–5 unverändert aus der vorherigen Session übernommen._
