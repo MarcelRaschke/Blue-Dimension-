@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="claude:viewport-fit-sides" content="cover">
+    <title>DJJJ Signature Bridge v2</title>
+    <meta name="description" content="OSC/MIDI/DMX live performance architecture — latency budgets, protocol schemas, TouchDesigner implementation">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="DJJJ Signature Bridge v2">
+    <meta property="og:description" content="Production-ready live performance sync architecture">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --bg: #060607;
+        --bg2: #0c0c0d;
+        --bg3: #131314;
+        --gold: #c9a84c;
+        --gold2: #e8c97a;
+        --gold3: #8a6820;
+        --white: #ede9e3;
+        --dim: rgba(237,233,227,.55);
+        --muted: rgba(237,233,227,.28);
+        --border: rgba(201,168,76,.12);
+        --accent-red: #ff6b6b;
+        --accent-cyan: #00d9ff;
+        color-scheme: dark;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--white);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        line-height: 1.65;
+        padding: 40px max(16px, env(safe-area-inset-left, 0px));
+        padding-right: max(16px, env(safe-area-inset-right, 0px));
+      }
+
+      h1 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        letter-spacing: -.02em;
+        margin-bottom: 12px;
+        color: var(--gold);
+      }
+
+      h2 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.8rem;
+        color: var(--gold2);
+        margin-top: 60px;
+        margin-bottom: 24px;
+        letter-spacing: -.01em;
+      }
+
+      h3 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.2rem;
+        color: var(--gold2);
+        margin-top: 32px;
+        margin-bottom: 16px;
+      }
+
+      .subtitle {
+        color: var(--muted);
+        font-size: .95rem;
+        margin-bottom: 48px;
+      }
+
+      .meta {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 40px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .meta-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .meta-label {
+        font-size: .8rem;
+        text-transform: uppercase;
+        letter-spacing: .1em;
+        color: var(--gold3);
+      }
+
+      .meta-value {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1rem;
+        color: var(--gold2);
+      }
+
+      .section {
+        margin-bottom: 80px;
+      }
+
+      .section p {
+        color: var(--dim);
+        margin-bottom: 16px;
+        max-width: 900px;
+      }
+
+      .section strong {
+        color: var(--gold2);
+      }
+
+      .block {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 24px;
+        margin-bottom: 24px;
+      }
+
+      .diagram {
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 24px;
+        margin-bottom: 24px;
+        overflow-x: auto;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: .85rem;
+        line-height: 1.4;
+        color: var(--gold);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 24px;
+      }
+
+      table th {
+        background: var(--bg3);
+        padding: 12px;
+        text-align: left;
+        font-size: .85rem;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        color: var(--gold3);
+        border-bottom: 2px solid var(--border);
+      }
+
+      table td {
+        padding: 12px;
+        border-bottom: 1px solid var(--border);
+        color: var(--dim);
+      }
+
+      table tr:hover {
+        background: var(--bg3);
+      }
+
+      .code-sample {
+        background: var(--bg3);
+        border-left: 3px solid var(--gold);
+        padding: 16px;
+        margin-bottom: 24px;
+        border-radius: 4px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: .85rem;
+        line-height: 1.5;
+        color: var(--gold2);
+        overflow-x: auto;
+      }
+
+      .latency-badge {
+        display: inline-block;
+        background: rgba(201, 168, 76, .12);
+        border: 1px solid var(--border);
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: .85rem;
+        font-family: 'Space Grotesk', sans-serif;
+        color: var(--gold2);
+        margin-right: 8px;
+        margin-bottom: 8px;
+      }
+
+      .latency-badge.critical {
+        border-color: var(--accent-red);
+        color: var(--accent-red);
+      }
+
+      .latency-badge.ok {
+        border-color: var(--accent-cyan);
+        color: var(--accent-cyan);
+      }
+
+      .checklist {
+        list-style: none;
+        margin-bottom: 24px;
+      }
+
+      .checklist li {
+        display: flex;
+        align-items: center;
+        padding: 12px 0;
+        color: var(--dim);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .checklist li:before {
+        content: "☐";
+        margin-right: 12px;
+        color: var(--gold);
+        font-weight: bold;
+      }
+
+      .nav-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 32px;
+        flex-wrap: wrap;
+      }
+
+      .tab-button {
+        padding: 8px 16px;
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        color: var(--dim);
+        border-radius: 4px;
+        font-size: .85rem;
+        cursor: pointer;
+        transition: all .2s;
+        font-family: 'Inter', sans-serif;
+      }
+
+      .tab-button.active {
+        background: var(--gold);
+        color: var(--bg);
+        border-color: var(--gold);
+      }
+
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+
+      .stat-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+      }
+
+      .stat-number {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 2rem;
+        color: var(--gold);
+        margin-bottom: 8px;
+      }
+
+      .stat-label {
+        font-size: .85rem;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        color: var(--gold3);
+      }
+
+      @media (max-width: 768px) {
+        h1 { font-size: 2rem; }
+        h2 { font-size: 1.4rem; }
+        .meta { gap: 12px; }
+        .nav-tabs { gap: 4px; }
+        .tab-button { padding: 6px 12px; font-size: .75rem; }
+      }
+    </style>
+</head>
+<body>
+
+<header style="margin-bottom: 60px; padding-bottom: 24px; border-bottom: 1px solid var(--border);">
+  <h1>DJJJ Signature Bridge v2</h1>
+  <p class="subtitle">OSC/MIDI/DMX Live Performance Architecture</p>
+  <div class="meta">
+    <div class="meta-item">
+      <span class="meta-label">Version</span>
+      <span class="meta-value">2.0</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Status</span>
+      <span class="meta-value">Production</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Latency Target</span>
+      <span class="meta-value">&lt;30ms</span>
+    </div>
+    <div class="meta-item">
+      <span class="meta-label">Network</span>
+      <span class="meta-value">100Mbps+</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<section class="section">
+  <h2>System Overview</h2>
+  <p>DJJJ Signature Bridge v2 is a network-synchronized protocol framework connecting live performance devices:</p>
+
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-number">3</div>
+      <div class="stat-label">Protocol Layers</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">512</div>
+      <div class="stat-label">DMX Channels</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">30Hz</div>
+      <div class="stat-label">OSC Update Rate</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">±100µs</div>
+      <div class="stat-label">PTP Sync</div>
+    </div>
+  </div>
+
+  <div class="block">
+    <h3>Three-Layer Architecture</h3>
+    <table>
+      <tr>
+        <th>Layer</th>
+        <th>Protocol</th>
+        <th>Purpose</th>
+        <th>Latency</th>
+      </tr>
+      <tr>
+        <td><strong>Audio Sync</strong></td>
+        <td>PTP (IEEE 1588)</td>
+        <td>Master clock reference (sub-millisecond)</td>
+        <td>&lt;1ms</td>
+      </tr>
+      <tr>
+        <td><strong>Beat/Control</strong></td>
+        <td>OSC + MIDI CC</td>
+        <td>Rekordbox → TouchDesigner state sync</td>
+        <td>~3ms</td>
+      </tr>
+      <tr>
+        <td><strong>Lighting</strong></td>
+        <td>DMX512 / Art-Net</td>
+        <td>TouchDesigner → Venue rig control</td>
+        <td>~23ms</td>
+      </tr>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <h2>Network Topology</h2>
+
+  <div class="diagram" style="min-height: 320px; white-space: pre-wrap; word-wrap: break-word; font-size: .75rem;">Venue Network (100Mbps Ethernet)
+
+  Rekordbox (CDJ XDJ)    Audio I/O (RME)
+  OSC :6969              PTP Master
+         ↓                   ↓
+         └───────────────────┬─────────────────┐
+                            │                 │
+                     TouchDesigner (Host PC)
+                     • OSC Listener :6969
+                     • DMX Output (Enttec)
+                            │
+                     ┌───────┴───────────┐
+                     ↓                   ↓
+              LED Bars (RGB)      Moving Lights
+              8x RGB Fixtures     Chauvet/ETC
+              Ch 10-33            Ch 1-9
+
+                     ↓
+              DMX512 Universe
+              (512 channels/line)</div>
+</section>
+
+<section class="section">
+  <h2>Latency Budget</h2>
+
+  <div class="block">
+    <p>End-to-end latency from Rekordbox beat to lighting rig response:</p>
+  </div>
+
+  <table>
+    <tr>
+      <th>Component</th>
+      <th>Latency</th>
+      <th>Status</th>
+      <th>Notes</th>
+    </tr>
+    <tr>
+      <td>Rekordbox OSC encode</td>
+      <td>2ms</td>
+      <td style="color: var(--accent-cyan);">✓</td>
+      <td>Real-time thread priority</td>
+    </tr>
+    <tr>
+      <td>Network transit (100m)</td>
+      <td>1ms</td>
+      <td style="color: var(--accent-cyan);">✓</td>
+      <td>Copper ethernet, local subnet</td>
+    </tr>
+    <tr>
+      <td>TouchDesigner decode</td>
+      <td>1ms</td>
+      <td style="color: var(--accent-cyan);">✓</td>
+      <td>GPU thread priority</td>
+    </tr>
+    <tr>
+      <td>TD → DMX render</td>
+      <td>3ms</td>
+      <td style="color: var(--accent-cyan);">✓</td>
+      <td>GPU shader pipeline</td>
+    </tr>
+    <tr>
+      <td>DMX transmit (512ch)</td>
+      <td>23ms</td>
+      <td style="color: var(--accent-cyan);">✓</td>
+      <td>~46µs per channel</td>
+    </tr>
+    <tr style="background: var(--bg3); font-weight: bold;">
+      <td>Total end-to-end</td>
+      <td>~30ms</td>
+      <td style="color: var(--accent-cyan);">✓ ACCEPTABLE</td>
+      <td>Imperceptible for visual sync</td>
+    </tr>
+  </table>
+</section>
+
+<section class="section">
+  <h2>Protocol Specification</h2>
+
+  <div class="nav-tabs">
+    <button class="tab-button active" onclick="switchTab('osc')">OSC Messages</button>
+    <button class="tab-button" onclick="switchTab('midi')">MIDI CC</button>
+    <button class="tab-button" onclick="switchTab('dmx')">DMX Channels</button>
+  </div>
+
+  <div id="osc" class="tab-content active">
+    <h3>OSC Message Schema (Rekordbox → TouchDesigner)</h3>
+
+    <div class="block">
+      <strong>Deck State (30Hz)</strong>
+      <div class="code-sample">/deck/1/playing       int    0=stopped, 1=playing
+/deck/1/bpm           float  Current BPM (e.g., 120.5)
+/deck/1/beat_grid     int    Current beat (0-3)
+/deck/1/time_position float  Milliseconds since start
+/deck/1/jog_position  float  Jog wheel (0.0-1.0, wraps)
+/deck/1/tempo_adjust  float  Tempo %: 1.0=100%, 1.1=+10%</div>
+    </div>
+
+    <div class="block">
+      <strong>Hot Cue Triggers (on-event)</strong>
+      <div class="code-sample">/cue/1/hit       int    Hot cue ID (1-8)
+/cue/1/color     int    RGB packed (0xRRGGBB)
+/cue/1/name      string Cue name ("Build", "Drop")</div>
+    </div>
+
+    <div class="block">
+      <strong>Master Clock (10Hz)</strong>
+      <div class="code-sample">/master/time     float  Unix timestamp (seconds.frac)
+/master/beat     int    Beat counter (wraps at 4)
+/master/bar      int    Bar number</div>
+    </div>
+  </div>
+
+  <div id="midi" class="tab-content">
+    <h3>MIDI CC Mapping</h3>
+    <table>
+      <tr>
+        <th>CC#</th>
+        <th>Parameter</th>
+        <th>Range</th>
+        <th>Purpose</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Modulation (Deck 1 Jog)</td>
+        <td>0-127</td>
+        <td>Jog wheel position</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Breath (Deck 1 Tempo)</td>
+        <td>0-127</td>
+        <td>Tempo (64=100%)</td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td>Channel Volume (Deck 1)</td>
+        <td>0-127</td>
+        <td>Deck 1 fader</td>
+      </tr>
+      <tr>
+        <td>10</td>
+        <td>Pan (Crossfader)</td>
+        <td>0-127</td>
+        <td>Left (0) → Right (127)</td>
+      </tr>
+      <tr>
+        <td>64-71</td>
+        <td>Hot Cue 1-8</td>
+        <td>0/127</td>
+        <td>On/off triggers</td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="dmx" class="tab-content">
+    <h3>DMX512 Channel Assignment</h3>
+    <div class="block">
+      <strong>Universe 1 (Channels 1-512)</strong>
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: .85rem; color: var(--dim); line-height: 1.8;">
+        <div>Ch 1-9:    Moving Lights (Pan/Tilt/Intensity)</div>
+        <div>Ch 10-33:  8× RGB LED Bars (R/G/B per fixture)</div>
+        <div>Ch 34-161: Video Panel 1 (128ch RGB PWM)</div>
+        <div>Ch 162-289: Video Panel 2 (128ch RGB PWM)</div>
+        <div>Ch 290-417: Video Panel 3 (128ch RGB PWM)</div>
+        <div>Ch 418-512: Video Panel 4 + Reserved</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <h2>Implementation Guide</h2>
+
+  <div class="block">
+    <h3>TouchDesigner OSC Setup</h3>
+    <p>Configure OSC listener on UDP port 6969 with Python callback:</p>
+    <div class="code-sample">def messageReceived(args, argString):
+  addr = args[0]
+  if addr == '/deck/1/bpm':
+    bpm = args[1]
+    op('chop_bpm').val = bpm
+  elif addr == '/cue/1/hit':
+    triggerCueAnimation(args[1])
+  elif addr == '/master/time':
+    op('chop_sync_time').val = args[1]</div>
+  </div>
+
+  <div class="block">
+    <h3>Rekordbox → OSC Bridge</h3>
+    <p><strong>Option 1 (Recommended):</strong> Use Pacemaker standalone bridge</p>
+    <p><strong>Option 2:</strong> Custom Node.js bridge with pioneer-sdk</p>
+    <p>Both export at 30Hz to UDP :6969 on target TouchDesigner host.</p>
+  </div>
+
+  <div class="block">
+    <h3>DMX Output (Enttec Pro)</h3>
+    <div class="code-sample">class DMXController:
+  def set_rgb(self, fixture_base, r, g, b):
+    self.set_channel(fixture_base, r)
+    self.set_channel(fixture_base + 1, g)
+    self.set_channel(fixture_base + 2, b)
+
+  def send_dmx(self):
+    # Transmit universe via USB serial
+    serial.write(self._encode_packet())</div>
+  </div>
+</section>
+
+<section class="section">
+  <h2>Production Deployment</h2>
+
+  <div class="block">
+    <h3>Pre-Show Checklist (30 min)</h3>
+    <ul class="checklist">
+      <li>Network connectivity verified (all devices on same subnet)</li>
+      <li>Rekordbox → OSC bridge running and logging</li>
+      <li>TouchDesigner listening on UDP :6969</li>
+      <li>DMX USB adapter recognized by OS</li>
+      <li>Beat sync test: Play track, verify counter in TD</li>
+      <li>Cue trigger test: Hit hot cue, watch animation</li>
+      <li>DMX test: Manually set channels, observe lighting</li>
+    </ul>
+  </div>
+
+  <div class="block">
+    <h3>Failsafe Protocols</h3>
+    <table>
+      <tr>
+        <th>Failure</th>
+        <th>Cause</th>
+        <th>Mitigation</th>
+      </tr>
+      <tr>
+        <td>OSC timeout (&gt;500ms)</td>
+        <td>Network disconnect</td>
+        <td>DMX freeze on last values</td>
+      </tr>
+      <tr>
+        <td>Rekordbox crash</td>
+        <td>Software fault</td>
+        <td>Manual DMX controller fallback</td>
+      </tr>
+      <tr>
+        <td>DMX USB error</td>
+        <td>Device disconnect</td>
+        <td>Auto-retry with exponential backoff</td>
+      </tr>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <div class="block" style="text-align: center; padding: 40px; background: var(--bg3);">
+    <p style="color: var(--gold2); font-size: 1.1rem; margin-bottom: 8px;">Ready for Production</p>
+    <p style="color: var(--muted); font-size: .9rem;">DJJJ Signature Bridge v2 | Last updated 2026-11-10</p>
+  </div>
+</section>
+
+</main>
+
+<script>
+function switchTab(tabName) {
+  // Hide all tabs
+  const tabs = document.querySelectorAll('.tab-content');
+  tabs.forEach(tab => tab.classList.remove('active'));
+
+  // Remove active class from buttons
+  const buttons = document.querySelectorAll('.tab-button');
+  buttons.forEach(btn => btn.classList.remove('active'));
+
+  // Show selected tab
+  document.getElementById(tabName).classList.add('active');
+
+  // Highlight button
+  event.target.classList.add('active');
+}
+</script>
+
+</body>
+</html>
