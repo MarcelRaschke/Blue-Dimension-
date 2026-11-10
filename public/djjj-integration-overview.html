@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="claude:viewport-fit-sides" content="cover">
+    <title>DJJJ Integration Overview</title>
+    <style>
+        :root {
+            --bg: #0a0e27;
+            --fg: #e0e0ff;
+            --accent: #d4af37;
+            --accent-dim: #9d8c1f;
+            --card-bg: #151a38;
+            --border: #2a3050;
+            --phase3: #60a5fa;
+            --phase4a: #34d399;
+            --phase4b: #f97316;
+            --phase4c: #a78bfa;
+            --success: #4ade80;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) { color-scheme: dark; }
+        }
+        :root[data-theme="dark"] { color-scheme: dark; }
+
+        body {
+            margin: 0;
+            padding: 16px;
+            padding-left: max(16px, env(safe-area-inset-left, 0px));
+            padding-right: max(16px, env(safe-area-inset-right, 0px));
+            background: var(--bg);
+            color: var(--fg);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-size: 14px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 0;
+            color: var(--accent);
+            text-shadow: 0 0 30px rgba(212, 175, 55, 0.4);
+        }
+
+        .header p {
+            margin: 8px 0 0 0;
+            color: var(--fg);
+            opacity: 0.7;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .tab-button {
+            padding: 10px 14px;
+            background: transparent;
+            border: none;
+            color: var(--fg);
+            cursor: pointer;
+            font-size: 13px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .tab-button.active {
+            border-bottom-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .architecture-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .phase-box {
+            background: var(--card-bg);
+            border: 2px solid;
+            border-radius: 8px;
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .phase-box.phase3 { border-color: var(--phase3); }
+        .phase-box.phase4a { border-color: var(--phase4a); }
+        .phase-box.phase4b { border-color: var(--phase4b); }
+        .phase-box.phase4c { border-color: var(--phase4c); }
+
+        .phase-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+        }
+
+        .phase-box.phase3::before { background: var(--phase3); }
+        .phase-box.phase4a::before { background: var(--phase4a); }
+        .phase-box.phase4b::before { background: var(--phase4b); }
+        .phase-box.phase4c::before { background: var(--phase4c); }
+
+        .phase-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .phase-badge {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .phase-badge.phase3 { background: rgba(96, 165, 250, 0.2); color: var(--phase3); }
+        .phase-badge.phase4a { background: rgba(52, 211, 153, 0.2); color: var(--phase4a); }
+        .phase-badge.phase4b { background: rgba(249, 115, 22, 0.2); color: var(--phase4b); }
+        .phase-badge.phase4c { background: rgba(167, 139, 250, 0.2); color: var(--phase4c); }
+
+        .phase-desc {
+            color: var(--fg);
+            opacity: 0.8;
+            margin: 8px 0;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .feature-tag {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 6px 10px;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .flow-arrow {
+            text-align: center;
+            font-size: 24px;
+            color: var(--accent);
+            opacity: 0.6;
+            margin: -10px 0;
+        }
+
+        .data-flow {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px;
+            margin: 16px 0;
+            font-size: 12px;
+            font-family: monospace;
+            line-height: 1.6;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--fg);
+            opacity: 0.6;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 16px;
+            padding: 12px;
+            border-left: 2px solid var(--border);
+            position: relative;
+        }
+
+        .timeline-item:first-child {
+            border-left-color: var(--phase3);
+        }
+        .timeline-item:nth-child(2) {
+            border-left-color: var(--phase4a);
+        }
+        .timeline-item:nth-child(3) {
+            border-left-color: var(--phase4b);
+        }
+        .timeline-item:nth-child(4) {
+            border-left-color: var(--phase4c);
+        }
+
+        .timeline-marker {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 2px solid;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        .timeline-item:nth-child(1) .timeline-marker {
+            border-color: var(--phase3);
+            color: var(--phase3);
+        }
+        .timeline-item:nth-child(2) .timeline-marker {
+            border-color: var(--phase4a);
+            color: var(--phase4a);
+        }
+        .timeline-item:nth-child(3) .timeline-marker {
+            border-color: var(--phase4b);
+            color: var(--phase4b);
+        }
+        .timeline-item:nth-child(4) .timeline-marker {
+            border-color: var(--phase4c);
+            color: var(--phase4c);
+        }
+
+        .timeline-content {
+            flex: 1;
+        }
+
+        .timeline-title {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .timeline-desc {
+            font-size: 12px;
+            color: var(--fg);
+            opacity: 0.7;
+        }
+
+        .performance-matrix {
+            overflow-x: auto;
+            margin: 16px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        th {
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--accent);
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+        }
+
+        td {
+            padding: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:hover { background: rgba(212, 175, 55, 0.02); }
+
+        .latency-bar {
+            display: inline-block;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(to right, var(--success), var(--accent-dim));
+            min-width: 60px;
+            vertical-align: middle;
+        }
+
+        .alert {
+            background: rgba(52, 211, 153, 0.1);
+            border: 1px solid var(--phase4a);
+            border-radius: 6px;
+            padding: 12px;
+            margin: 16px 0;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .alert-title {
+            font-weight: 600;
+            color: var(--phase4a);
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>DJJJ Integration Overview</h1>
+        <p>Phase 3D + 4A + 4B + 4C: Complete Audio-Reactive Visual Engine</p>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-button active" onclick="switchTab('architecture')">Architecture</button>
+        <button class="tab-button" onclick="switchTab('dataflow')">Data Flow</button>
+        <button class="tab-button" onclick="switchTab('timeline')">Boot Sequence</button>
+        <button class="tab-button" onclick="switchTab('performance')">Performance</button>
+    </div>
+
+    <!-- Architecture Tab -->
+    <div id="architecture" class="tab-content active">
+        <div class="architecture-flow">
+            <div class="phase-box phase3">
+                <div class="phase-title">
+                    Phase 3D: Audio Ingestion
+                    <span class="phase-badge phase3">Audio</span>
+                </div>
+                <div class="phase-desc">
+                    Live audio from Rekordbox CDJ stream (48kHz), MIDI sync, beat counter. FFT analysis: 8-band frequency bins, RMS energy, spectral centroid.
+                </div>
+                <div class="features">
+                    <div class="feature-tag">48kHz PCM</div>
+                    <div class="feature-tag">MIDI Sync</div>
+                    <div class="feature-tag">8-Band FFT</div>
+                    <div class="feature-tag">Beat Counter</div>
+                </div>
+                <div class="data-flow">
+/djjj/freqs/[0..7]  @ 30Hz (frequency bins)
+/djjj/audio/rms     @ 30Hz (energy 0–1)
+Bar/Beat sync       @ MIDI tempo
+                </div>
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="phase-box phase4a">
+                <div class="phase-title">
+                    Phase 4A: AI Track-Analyse
+                    <span class="phase-badge phase4a">LLM</span>
+                </div>
+                <div class="phase-desc">
+                    Local LLM feature extraction (llama.cpp, Mistral 7B Q5). 30Hz heuristic path (librosa) + optional per-track LLM enrichment. Semantic mood, energy, sonic characteristics.
+                </div>
+                <div class="features">
+                    <div class="feature-tag">Key Detection</div>
+                    <div class="feature-tag">Mood Analysis</div>
+                    <div class="feature-tag">Energy Score</div>
+                    <div class="feature-tag">&lt;500ms Latency</div>
+                </div>
+                <div class="data-flow">
+/djjj/ai/energy           (0–100)
+/djjj/ai/mood             (string)
+/djjj/ai/spectral_centroid (Hz)
+/djjj/ai/source           (llm|heuristic)
+                </div>
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="phase-box phase4b">
+                <div class="phase-title">
+                    Phase 4B: GPU Particles
+                    <span class="phase-badge phase4b">Compute</span>
+                </div>
+                <div class="phase-desc">
+                    GPU-resident particle system (GLSL 4.3+, 256 threads/block). 10K–100K particles with frequency-driven acceleration, physics simulation, lifetime management. Renders as additive glow layer.
+                </div>
+                <div class="features">
+                    <div class="feature-tag">256 threads/block</div>
+                    <div class="feature-tag">Frequency Sync</div>
+                    <div class="feature-tag">Physics Sim</div>
+                    <div class="feature-tag">6.8ms Headroom</div>
+                </div>
+                <div class="data-flow">
+Particle SSBO     (positions, velocities, lifetimes)
+Freq-driven accel (Phase 3D frequency bins)
+Energy-based size (Phase 4A energy)
+Beat sync spawn   (Phase 3D bar counter)
+                </div>
+            </div>
+
+            <div class="flow-arrow">↓</div>
+
+            <div class="phase-box phase4c">
+                <div class="phase-title">
+                    Phase 4C: Volumetric Lighting
+                    <span class="phase-badge phase4c">Ray-March</span>
+                </div>
+                <div class="phase-desc">
+                    Ray-marching compute shaders with volumetric scattering. 3D particle density field (64³ texture), 64-step screen-space ray-march, audio-reactive light parameters. Final composite with depth-of-field bokeh.
+                </div>
+                <div class="features">
+                    <div class="feature-tag">3D Density Field</div>
+                    <div class="feature-tag">64 Ray Steps</div>
+                    <div class="feature-tag">Mood-Driven Scatter</div>
+                    <div class="feature-tag">&lt;2ms Ray-March</div>
+                </div>
+                <div class="data-flow">
+Density texture   (64³, from Phase 4B particles)
+scattering_coeff  (0.1–1.0, from Phase 4A energy)
+absorption_coeff  (0.3–0.8, from Phase 4A mood)
+light_color       (mapped from spectral centroid)
+                </div>
+            </div>
+        </div>
+
+        <div class="alert">
+            <div class="alert-title">Zero-Cloud Architecture</div>
+            All computation local: Phase 3D Bridge (CDJ audio), Phase 4A (llama.cpp), Phase 4B/4C (GPU). No external APIs, GDPR/revDSG compliant.
+        </div>
+    </div>
+
+    <!-- Data Flow Tab -->
+    <div id="dataflow" class="tab-content">
+        <h3>Real-Time Parameter Binding</h3>
+
+        <div class="phase-box phase3">
+            <div class="phase-title">Phase 3D → Phase 4B Particle Parameters</div>
+            <div class="data-flow">
+freq_bins[0..7]     → Particle acceleration (per spatial axis)
+RMS energy          → Particle size + alpha
+Bar/Beat counter    → Spawn sync + light animation
+MIDI Key (0–11)     → HSV hue mapping
+            </div>
+        </div>
+
+        <div class="phase-box phase4a">
+            <div class="phase-title">Phase 4A → Phase 4C GPU Uniforms</div>
+            <div class="data-flow">
+energy (0–100)      → scattering_coeff = 0.1 + (energy / 100) * 0.9
+mood (string)       → absorption_coeff: energetic=0.3, warm=0.8, balanced=0.5
+spectral_centroid   → light_color RGB mapping
+                      &lt;2kHz: (1.0, 0.6, 0.2) warm
+                      2–4kHz: (1.0, 0.8, 0.6) balanced
+                      &gt;4kHz: (1.0, 1.0, 0.8) bright
+            </div>
+        </div>
+
+        <div class="phase-box phase4b">
+            <div class="phase-title">Phase 4B → Phase 4C Density Field</div>
+            <div class="data-flow">
+Particle SSBO       → Input to density compute shader
+Positions + Radius  → Gaussian contributions per voxel
+Lifetime            → Fade parameter (older particles less dense)
+                      Output: 3D texture 64³ (updated every frame)
+            </div>
+        </div>
+
+        <div class="phase-box phase4c">
+            <div class="phase-title">Phase 4C → Display / Compositing</div>
+            <div class="data-flow">
+Ray-march output    → Volumetric lighting texture (HDR)
+Particle layer      → Phase 4B additive base
+Depth layer         → Focus distance from bar counter
+                      Final: composite + tone-map + optional bokeh
+            </div>
+        </div>
+    </div>
+
+    <!-- Boot Sequence Tab -->
+    <div id="timeline" class="tab-content">
+        <h3>Startup Initialization (3s → Ready)</h3>
+
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-marker">1</div>
+                <div class="timeline-content">
+                    <div class="timeline-title">T=0s: Start Phase 3D Bridge</div>
+                    <div class="timeline-desc">Audio input (Rekordbox CDJ), MIDI sync active, OSC broadcast ready on /djjj/freqs/[0..7] @ 30Hz</div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-marker">2</div>
+                <div class="timeline-content">
+                    <div class="timeline-title">T=0.5s: Start Phase 4A (Local LLM)</div>
+                    <div class="timeline-desc">llama.cpp server listening on localhost:8001, heuristic feature extraction ready, OSC broadcast on /djjj/ai/* @ 30Hz</div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-marker">3</div>
+                <div class="timeline-content">
+                    <div class="timeline-title">T=1.0s: Load TouchDesigner TOX</div>
+                    <div class="timeline-desc">djjj_signature_bridge.toe opens, OSC receiver listening on port 9000, GPU resources initialized</div>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-marker">4</div>
+                <div class="timeline-content">
+                    <div class="timeline-title">T=1.5s–3.0s: Activate Subsystems</div>
+                    <div class="timeline-desc">Particle system (Phase 4B) spawns 10K–100K particles. Volumetric renderer (Phase 4C) initializes. Performance dashboard starts profiling.</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 24px; padding: 12px; background: rgba(0, 0, 0, 0.2); border-radius: 6px;">
+            <strong>Ready State (T ≈ 3s):</strong>
+            <br>
+            • All OSC streams active (Phase 3D, 4A → TouchDesigner)
+            <br>
+            • GPU particle system rendering
+            <br>
+            • Ray-marching shader active
+            <br>
+            • Performance monitoring live
+            <br>
+            <br>
+            <strong style="color: var(--success);">✓ DJ can start mix</strong>
+        </div>
+    </div>
+
+    <!-- Performance Tab -->
+    <div id="performance" class="tab-content">
+        <h3>Performance Profile @ 60Hz (16.67ms budget)</h3>
+
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-label">Phase 3D</div>
+                <div class="stat-value">2ms</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Phase 4A</div>
+                <div class="stat-value">&lt;0.5ms</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Phase 4B</div>
+                <div class="stat-value">2ms</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Phase 4C</div>
+                <div class="stat-value">2ms</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total</div>
+                <div class="stat-value">6.5ms</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Headroom</div>
+                <div class="stat-value">10.2ms</div>
+            </div>
+        </div>
+
+        <h3 style="margin-top: 24px;">GPU Memory Allocation (6GB Target)</h3>
+
+        <div class="performance-matrix">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Size</th>
+                        <th>Usage %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Phase 4B Particle SSBO (100K × vec4)</td>
+                        <td>1.6 MB</td>
+                        <td><span class="latency-bar" style="width: 5%;"></span> 0.03%</td>
+                    </tr>
+                    <tr>
+                        <td>Phase 4C Density Texture (64³ × float)</td>
+                        <td>1 MB</td>
+                        <td><span class="latency-bar" style="width: 3%;"></span> 0.02%</td>
+                    </tr>
+                    <tr>
+                        <td>GLSL Shaders + Uniforms</td>
+                        <td>2 MB</td>
+                        <td><span class="latency-bar" style="width: 5%;"></span> 0.03%</td>
+                    </tr>
+                    <tr>
+                        <td>Depth/Normal/HDR Textures</td>
+                        <td>8 MB</td>
+                        <td><span class="latency-bar" style="width: 15%;"></span> 0.13%</td>
+                    </tr>
+                    <tr>
+                        <td>llama.cpp LLM Model (Mistral Q5)</td>
+                        <td>5 GB</td>
+                        <td><span class="latency-bar" style="width: 80%;"></span> 83%</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 600; color: var(--accent);">VRAM Headroom</td>
+                        <td style="font-weight: 600; color: var(--accent);">~1 GB</td>
+                        <td style="font-weight: 600; color: var(--accent);"><span class="latency-bar" style="width: 20%;"></span> ~17%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3 style="margin-top: 24px;">Failsafe Thresholds</h3>
+
+        <div style="display: grid; gap: 12px;">
+            <div style="background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border); border-radius: 6px; padding: 12px;">
+                <strong style="color: var(--phase4c);">Phase 4C Ray-Step Adaptation</strong>
+                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">
+                    • GPU time &gt; 2ms → reduce to 32 steps<br>
+                    • GPU time &gt; 3ms → reduce to 16 steps<br>
+                    • GPU temp &gt; 80°C → reduce ray steps
+                </div>
+            </div>
+
+            <div style="background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border); border-radius: 6px; padding: 12px;">
+                <strong style="color: var(--phase4a);">Phase 4A LLM Timeout</strong>
+                <div style="font-size: 12px; margin-top: 8px; opacity: 0.8;">
+                    • LLM inference timeout: 500ms<br>
+                    • Fallback: heuristic analysis (&lt;50ms)<br>
+                    • Never blocks real-time pipeline
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
