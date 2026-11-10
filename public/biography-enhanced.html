@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Biografie · DJ Jesse Jay</title>
+    <meta name="description" content="since 1997 the progressive music attack">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" href="favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/img/favicon-192.png">
+    <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Biografie · DJ Jesse Jay">
+    <meta property="og:image" content="https://djjessejay.ch/assets/img/neon-plate.webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="675">
+    <meta property="og:image:alt" content="Neon-Schild: DJ Jesse Jay, Progressive Music Attack, Zürich, Radio LoRa 97.5">
+    <meta name="twitter:card" content="summary_large_image">
+    <style>
+      :root {
+        --bg: #060607;
+        --bg2: #0c0c0d;
+        --bg3: #131314;
+        --gold: #c9a84c;
+        --gold2: #e8c97a;
+        --gold3: #8a6820;
+        --white: #ede9e3;
+        --dim: rgba(237,233,227,.55);
+        --muted: rgba(237,233,227,.28);
+        --border: rgba(201,168,76,.12);
+        --hair: rgba(255,255,255,.07);
+        color-scheme: dark;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--white);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        line-height: 1.65;
+        padding: 40px max(16px, env(safe-area-inset-left, 0px));
+        padding-right: max(16px, env(safe-area-inset-right, 0px));
+      }
+
+      h1 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        letter-spacing: -.02em;
+        margin-bottom: 12px;
+        color: var(--gold);
+      }
+
+      .subtitle {
+        color: var(--muted);
+        font-size: .95rem;
+        margin-bottom: 48px;
+      }
+
+      .portrait-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        margin-bottom: 80px;
+        align-items: center;
+      }
+
+      .portrait-canvas {
+        aspect-ratio: 1;
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        display: block;
+        width: 100%;
+      }
+
+      .portrait-info {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .portrait-info h2 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.8rem;
+        color: var(--gold2);
+        letter-spacing: -.01em;
+      }
+
+      .portrait-info p {
+        color: var(--dim);
+        line-height: 1.8;
+      }
+
+      .style-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .tag {
+        padding: 6px 12px;
+        background: rgba(201, 168, 76, .08);
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        font-size: .85rem;
+        color: var(--gold2);
+        letter-spacing: .05em;
+        text-transform: uppercase;
+      }
+
+      .carousel-section {
+        margin-bottom: 80px;
+      }
+
+      .carousel-section h2 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 2rem;
+        color: var(--gold2);
+        margin-bottom: 32px;
+        letter-spacing: -.01em;
+      }
+
+      .carousel-container {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .carousel-track {
+        display: flex;
+        gap: 20px;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        padding-bottom: 12px;
+        scroll-padding: 0;
+      }
+
+      .carousel-track::-webkit-scrollbar {
+        height: 6px;
+      }
+
+      .carousel-track::-webkit-scrollbar-track {
+        background: var(--bg2);
+        border-radius: 3px;
+      }
+
+      .carousel-track::-webkit-scrollbar-thumb {
+        background: var(--gold);
+        border-radius: 3px;
+      }
+
+      .carousel-item {
+        flex: 0 0 300px;
+        padding: 24px;
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .carousel-year {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.6rem;
+        color: var(--gold);
+        font-weight: 700;
+      }
+
+      .carousel-label {
+        font-size: .8rem;
+        text-transform: uppercase;
+        letter-spacing: .1em;
+        color: var(--gold3);
+      }
+
+      .carousel-text {
+        font-size: .95rem;
+        color: var(--dim);
+        line-height: 1.6;
+      }
+
+      .prose {
+        max-width: 900px;
+        margin: 60px auto;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .prose p {
+        color: var(--dim);
+        line-height: 1.8;
+      }
+
+      .prose strong {
+        color: var(--gold2);
+      }
+
+      .lang-switch {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 32px;
+      }
+
+      .lang-switch a {
+        padding: 6px 12px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        color: var(--dim);
+        text-decoration: none;
+        font-size: .85rem;
+        transition: all .2s;
+      }
+
+      .lang-switch a[aria-current="true"] {
+        background: var(--gold);
+        border-color: var(--gold);
+        color: var(--bg);
+      }
+
+      .lang-switch a:hover {
+        border-color: var(--gold);
+        color: var(--gold2);
+      }
+
+      @media (max-width: 900px) {
+        .portrait-section {
+          grid-template-columns: 1fr;
+          gap: 32px;
+        }
+
+        h1 {
+          font-size: 2rem;
+        }
+
+        .carousel-item {
+          flex: 0 0 280px;
+        }
+      }
+    </style>
+</head>
+<body>
+<header style="margin-bottom: 40px; padding-bottom: 24px; border-bottom: 1px solid var(--border);">
+    <h1 style="margin-bottom: 6px;">DJ Jesse Jay</h1>
+    <p class="subtitle">since 1997 · progressive music attack</p>
+    <nav class="lang-switch" aria-label="Sprache">
+        <a href="biography.html">Deutsch</a>
+        <a href="biography-en.html">English</a>
+    </nav>
+</header>
+
+<main>
+    <section class="portrait-section">
+        <canvas class="portrait-canvas" id="portraitCanvas"></canvas>
+        <div class="portrait-info">
+            <h2>Identity Waveform</h2>
+            <p>Underground club DJ since 1997, resident at legendary Zürich venues. Specializing in progressive house, deep tech, and minimal electrotrance with signature finesse and emotional depth.</p>
+            <div>
+                <p style="font-size: .9rem; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 12px;">Genre</p>
+                <div class="style-tags">
+                    <span class="tag">Progressive</span>
+                    <span class="tag">Deep House</span>
+                    <span class="tag">Techno</span>
+                    <span class="tag">Minimal</span>
+                </div>
+            </div>
+            <div>
+                <p style="font-size: .9rem; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 12px;">Base</p>
+                <div class="style-tags">
+                    <span class="tag">Zürich</span>
+                    <span class="tag">Radio LoRa 97.5</span>
+                    <span class="tag">est. 1997</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="carousel-section">
+        <h2>Career Timeline</h2>
+        <div class="carousel-container">
+            <div class="carousel-track" id="carouselTrack">
+                <div class="carousel-item">
+                    <div class="carousel-year">1997</div>
+                    <div class="carousel-label">Genesis</div>
+                    <div class="carousel-text">DJ Jesse Jay begins residencies at legendary underground clubs: Aera, Labyrinth, SpiderGalaxy.</div>
+                </div>
+                <div class="carousel-item">
+                    <div class="carousel-year">2000–2005</div>
+                    <div class="carousel-label">Club Era</div>
+                    <div class="carousel-text">Resident DJ at Take A Dance, Hermetschloo, Dachkantine. Developing signature progressive sound and deep emotional connection with dance floors.</div>
+                </div>
+                <div class="carousel-item">
+                    <div class="carousel-year">2008</div>
+                    <div class="carousel-label">Radio LoRa Debut</div>
+                    <div class="carousel-text">Joins Galaxy Space Night on Radio LoRa (97.5). Begins broadcasting 6-hour sets every two weeks from Zürich studio.</div>
+                </div>
+                <div class="carousel-item">
+                    <div class="carousel-year">2010–2015</div>
+                    <div class="carousel-label">Expansion</div>
+                    <div class="carousel-text">Galaxy Space Night expands to Radio Stadtfilter (Winterthur) and Radio RaBe (Bern). GSN crew solidifies regional presence.</div>
+                </div>
+                <div class="carousel-item">
+                    <div class="carousel-year">2015–2020</div>
+                    <div class="carousel-label">Deep Focus</div>
+                    <div class="carousel-text">Refines craft: CDJ mastery, vinyl artistry, signature blend of minimal-maximal electrotrance. Emphasis on entry, main act, and outro pacing.</div>
+                </div>
+                <div class="carousel-item">
+                    <div class="carousel-year">2020–2024</div>
+                    <div class="carousel-label">Blue Dimension</div>
+                    <div class="carousel-text">Launch of Blue Dimension brand identity. Development of DJJJ Signature Bridge (OSC/audio bridge architecture). Focus on live performance systems and production.</div>
+                </div>
+                <div class="carousel-item">
+                    <div class="carousel-year">2024–2026</div>
+                    <div class="carousel-label">Present</div>
+                    <div class="carousel-text">Continued evolution of production setup, live rig optimization. Exploring computer vision, generative art, and advanced audio-reactive systems.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="prose">
+        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; color: var(--gold2); margin: 40px 0 20px;">Philosophy</h2>
+        <p>Do you know the feeling of DJ..DJ..your sound is always the same? Suddenly pulled into a circle, passionately awakening in a remarkable way — the feeling of being transported through music. Jesse feels this deeply, and transmits his sound and emotions to the crowd with radical sensitivity.</p>
+        <p>Grown up in the infectious party spirit of legendary clubs like Aera, Labyrinth, and SpiderGalaxy, Jesse learned the importance of equal weight at the entry, the main act, and the outro. Every track, every transition, every moment matters.</p>
+        <p><strong>Galaxy Space Night</strong> has represented electronic music on community radio for over 15 years. Every Saturday on Radio RaBe, every other Thursday from Zürich at the witching hour on Radio LoRa — presenting the latest from the electronic sound world.</p>
+        <p>A loyal vinyl lover who equally enjoys the CDJ. A DJ who measures every breath of the journey with precision and soul.</p>
+    </section>
+</main>
+
+<script>
+  function drawPortrait(canvas) {
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width = canvas.offsetWidth * 2;
+    const h = canvas.height = canvas.offsetHeight * 2;
+    const t = performance.now() / 2000;
+
+    ctx.fillStyle = '#0c0c0d';
+    ctx.fillRect(0, 0, w, h);
+
+    const cx = w / 2, cy = h / 2;
+
+    // Oscilloscope waveform grid
+    ctx.strokeStyle = 'rgba(201, 168, 76, 0.1)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+      const y = (h / 4) * i;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
+      const x = (w / 4) * i;
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, h);
+      ctx.stroke();
+    }
+
+    // Main waveform
+    ctx.strokeStyle = '#c9a84c';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    for (let x = 0; x < w; x += 4) {
+      const norm = x / w;
+      const y = cy + Math.sin((norm - t * 0.5) * Math.PI * 4 + t * 2) * 60
+                     + Math.cos((norm - t * 0.3) * Math.PI * 2 + t * 1.5) * 40;
+      if (x === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    // Harmonic layers
+    ctx.strokeStyle = 'rgba(232, 201, 122, 0.4)';
+    ctx.lineWidth = 1;
+    for (let layer = 1; layer <= 2; layer++) {
+      ctx.beginPath();
+      for (let x = 0; x < w; x += 4) {
+        const norm = x / w;
+        const y = cy + Math.sin((norm - t * 0.5) * Math.PI * layer * 8 + t * 1) * (40 / layer);
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+
+    // Spectrum bars
+    const barCount = 12;
+    for (let i = 0; i < barCount; i++) {
+      const bx = (w / (barCount + 1)) * (i + 1);
+      const freq = (i / barCount);
+      const height = 80 + Math.sin(t * 2 + freq * Math.PI * 2) * 60;
+      ctx.fillStyle = `rgba(201, 168, 76, ${0.3 + Math.sin(t + freq) * 0.2})`;
+      ctx.fillRect(bx - 8, cy + 100, 16, height);
+    }
+
+    // Central ID marker
+    ctx.fillStyle = '#c9a84c';
+    ctx.beginPath();
+    ctx.arc(cx, cy - 80, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Text overlay
+    ctx.fillStyle = 'rgba(237, 233, 227, 0.3)';
+    ctx.font = '12px "Space Grotesk", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('DJ Jesse Jay • 1997–2026', cx, h - 20);
+  }
+
+  const canvas = document.getElementById('portraitCanvas');
+  if (canvas) {
+    drawPortrait(canvas);
+    let rafId;
+    function animate() {
+      drawPortrait(canvas);
+      rafId = requestAnimationFrame(animate);
+    }
+    animate();
+
+    window.addEventListener('beforeunload', () => cancelAnimationFrame(rafId));
+  }
+</script>
+</body>
+</html>
