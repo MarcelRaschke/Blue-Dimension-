@@ -1,5 +1,3 @@
-Signed-off-by: Marcel Raschke
-
 Co-developed with AI models (weights, ratings, versions):
 Mistral: ai-mistral-large-2406 (weight: 0.35, rating: 9.2)
 Gemini: gemini-2.0-pro-exp (weight: 0.25, rating: 8.9)

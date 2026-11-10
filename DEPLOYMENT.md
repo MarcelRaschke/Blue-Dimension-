@@ -103,7 +103,7 @@ export DEPLOY_KNOWN_HOSTS=~/.ssh/deploy_known_hosts
 DEPLOY_HOST=DEPLOY_HOST DEPLOY_USER=DEPLOY_USER scripts/restore-deployment.sh
 ```
 
-Offen für den Deploy-Workflow: `deploy.yml` setzt `DEPLOY_KNOWN_HOSTS` noch nicht. Ohne diese Angabe scheitert der Backup-Schritt mit Warnung, und der Deploy läuft ohne Backup weiter. Vor der Wiederaktivierung des Auto-Deploy muss der Schlüssel als Secret hinterlegt und im Workflow in eine Datei geschrieben werden.
+`deploy.yml` schreibt `secrets.DEPLOY_KNOWN_HOSTS` (falls gesetzt) vor dem Backup-Schritt nach `~/.ssh/deploy_known_hosts` und übergibt den Pfad an Backup- und Rollback-Schritt. Offen bleibt nur noch das Secret selbst: Solange `DEPLOY_KNOWN_HOSTS` im Repository nicht hinterlegt ist, bricht der Backup-Schritt weiterhin mit derselben Fehlermeldung wie bisher ab (kein neues Verhalten, keine Regression) – erst nach Schritt 2 oben (Secret anlegen) läuft der Backup-Schritt tatsächlich durch.
 
 ## Pre-Deployment Validation
 
