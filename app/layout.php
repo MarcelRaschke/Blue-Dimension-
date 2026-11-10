@@ -14,6 +14,7 @@ const NAV_ITEMS = [
     'gallery.html' => 'Galerie',
     'links.html' => 'Links',
     'gbook.html' => 'Gästebuch',
+    'pixel2voxel.html' => 'Pixel2Voxel',
 ];
 
 /**
@@ -31,6 +32,7 @@ function render_page(string $title, string $activeFile, callable $body): void
     <title><?= h($pageTitle) ?></title>
     <meta name="description" content="<?= h(SITE_TAGLINE) ?>">
     <link rel="stylesheet" href="assets/site.css">
+    <script src="assets/js/htmx.min.js" defer></script>
     <link rel="icon" href="favicon.ico" sizes="any">
     <link rel="icon" type="image/png" sizes="32x32" href="<?= h(IMAGE_BASE_PATH . 'favicon-32.png') ?>">
     <link rel="icon" type="image/png" sizes="192x192" href="<?= h(IMAGE_BASE_PATH . 'favicon-192.png') ?>">
@@ -43,7 +45,7 @@ function render_page(string $title, string $activeFile, callable $body): void
     <meta property="og:image:alt" content="<?= h(image_def(OG_IMAGE_KEY)['alt']) ?>">
     <meta name="twitter:card" content="summary_large_image">
 </head>
-<body>
+<body hx-boost="true">
 <header class="site-header">
     <a class="brand" href="index.html"><?= image_tag('logo-badge', 'brand-logo', true, '') ?><span><?= h(SITE_NAME) ?></span></a>
     <nav class="site-nav" aria-label="Hauptnavigation">

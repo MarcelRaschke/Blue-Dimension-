@@ -29,7 +29,7 @@ $dirty = '<font color="#0000ff"><a href="http://www.123galaxy.ch">Galaxy</a></fo
     . '<div onclick="x()">d</div><iframe src="https://evil.example"></iframe>';
 $clean = sanitize_html($dirty);
 check('sanitize keeps safe link', str_contains($clean, 'href="http://www.123galaxy.ch"'), $clean);
-check('sanitize keeps font color', str_contains($clean, 'color="#0000ff"'), $clean);
+check('sanitize drops font color (link color comes from the --link token)', !str_contains($clean, 'color="#0000ff"'), $clean);
 check('sanitize removes script', !str_contains(strtolower($clean), '<script'), $clean);
 check('sanitize removes img and onerror', !str_contains(strtolower($clean), 'onerror') && !str_contains(strtolower($clean), '<img'), $clean);
 check('sanitize removes javascript: href', !str_contains(strtolower($clean), 'javascript:'), $clean);
@@ -94,7 +94,9 @@ $_GET = [];
 require __DIR__ . '/../templates/gbook.php';
 $gbookHtml = (string) ob_get_clean();
 check('gbook output contains no mailto', !str_contains($gbookHtml, 'mailto:'));
-check('gbook output escapes markup', !str_contains($gbookHtml, '<script'));
+// The layout loads htmx with its own <script> tag, so only the page content is checked.
+preg_match('#<main.*</main>#s', $gbookHtml, $gbookMain);
+check('gbook output escapes markup', !str_contains($gbookMain[0] ?? '', '<script'));
 
 // 5. Images: manifest matches the files, budget holds, every image is used.
 $imageDir = __DIR__ . '/../public/assets/img';

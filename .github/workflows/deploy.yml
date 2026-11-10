@@ -70,6 +70,13 @@ jobs:
             ! -path "./.git/*" \
             ! -path "./.github/*" | wc -l
 
+      - name: Write known_hosts for SSH scripts
+        if: ${{ secrets.DEPLOY_KNOWN_HOSTS != '' }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/deploy_known_hosts
+          chmod 600 ~/.ssh/deploy_known_hosts
+
       - name: Create pre-deployment backup
         id: backup
         run: |
@@ -80,6 +87,7 @@ jobs:
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_KNOWN_HOSTS: ~/.ssh/deploy_known_hosts
 
       - name: Deploy via SFTP
         id: deploy
@@ -88,21 +96,12 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_KEY }}
           REMOTE_HOST: ${{ secrets.DEPLOY_HOST }}
           REMOTE_USER: ${{ secrets.DEPLOY_USER }}
+          SOURCE_DIR: ./public/
           REMOTE_PATH: /home/${{ secrets.DEPLOY_USER }}/public_html/
           ARGS: "-avz --delete --checksum"
           EXCLUDE: |
             .git/
             .github/
-            node_modules/
-            vendor/
-            .env
-            .env.local
-            *.swp
-            *.swo
-            *~
-            .DS_Store
-            npm-debug.log
-            package-lock.json
 
       - name: Verify deployment health
         id: verify
@@ -122,6 +121,7 @@ jobs:
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_KNOWN_HOSTS: ~/.ssh/deploy_known_hosts
 
       - name: Send Slack notification - success
         if: success()

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Making Of · DJ Jesse Jay</title>
+    <meta name="description" content="1997–2026: The journey of DJ Jesse Jay">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" href="favicon.ico" sizes="any">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/img/favicon-192.png">
+    <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Making Of · DJ Jesse Jay">
+    <meta property="og:image" content="https://djjessejay.ch/assets/img/neon-plate.webp">
+    <style>
+      :root {
+        --bg: #060607;
+        --bg2: #0c0c0d;
+        --bg3: #131314;
+        --gold: #c9a84c;
+        --gold2: #e8c97a;
+        --gold3: #8a6820;
+        --white: #ede9e3;
+        --dim: rgba(237,233,227,.55);
+        --muted: rgba(237,233,227,.28);
+        --border: rgba(201,168,76,.12);
+        --hair: rgba(255,255,255,.07);
+        color-scheme: dark;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--white);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        line-height: 1.65;
+        padding: 40px max(16px, env(safe-area-inset-left, 0px));
+        padding-right: max(16px, env(safe-area-inset-right, 0px));
+      }
+
+      h1 {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        letter-spacing: -.02em;
+        margin-bottom: 12px;
+        color: var(--gold);
+      }
+
+      .subtitle {
+        color: var(--muted);
+        font-size: .95rem;
+        margin-bottom: 48px;
+      }
+
+      .timeline-container {
+        position: relative;
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+
+      .timeline-axis {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 2px;
+        height: 100%;
+        background: linear-gradient(to bottom, var(--gold), transparent);
+        z-index: 0;
+      }
+
+      .timeline {
+        position: relative;
+        z-index: 1;
+      }
+
+      .timeline-event {
+        margin-bottom: 60px;
+        opacity: 0;
+        animation: fadeIn .6s ease-out forwards;
+      }
+
+      .timeline-event:nth-child(1) { animation-delay: .1s; }
+      .timeline-event:nth-child(2) { animation-delay: .2s; }
+      .timeline-event:nth-child(3) { animation-delay: .3s; }
+      .timeline-event:nth-child(4) { animation-delay: .4s; }
+      .timeline-event:nth-child(5) { animation-delay: .5s; }
+      .timeline-event:nth-child(6) { animation-delay: .6s; }
+      .timeline-event:nth-child(7) { animation-delay: .7s; }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .timeline-event:nth-child(odd) {
+        padding-right: calc(50% + 40px);
+        text-align: right;
+      }
+
+      .timeline-event:nth-child(even) {
+        padding-left: calc(50% + 40px);
+        text-align: left;
+      }
+
+      .timeline-dot {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 12px;
+        height: 12px;
+        background: var(--gold);
+        border: 2px solid var(--bg);
+        border-radius: 50%;
+        top: 0;
+        z-index: 2;
+      }
+
+      .timeline-event:nth-child(odd) .timeline-dot::before {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 2px;
+        background: var(--gold);
+        right: -20px;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+
+      .timeline-event:nth-child(even) .timeline-dot::before {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 2px;
+        background: var(--gold);
+        left: -20px;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+
+      .event-content {
+        padding: 24px;
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+      }
+
+      .event-year {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--gold);
+        margin-bottom: 8px;
+      }
+
+      .event-phase {
+        font-size: .75rem;
+        text-transform: uppercase;
+        letter-spacing: .15em;
+        color: var(--gold3);
+        margin-bottom: 12px;
+      }
+
+      .event-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.2rem;
+        color: var(--gold2);
+        margin-bottom: 12px;
+        font-weight: 600;
+      }
+
+      .event-description {
+        color: var(--dim);
+        line-height: 1.7;
+        font-size: .95rem;
+      }
+
+      .milestone-icon {
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        margin-right: 8px;
+        opacity: .7;
+      }
+
+      .legend {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-top: 80px;
+        padding-top: 40px;
+        border-top: 1px solid var(--border);
+      }
+
+      .legend-item {
+        padding: 16px;
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+      }
+
+      .legend-label {
+        font-size: .8rem;
+        text-transform: uppercase;
+        letter-spacing: .1em;
+        color: var(--gold3);
+        margin-bottom: 6px;
+      }
+
+      .legend-count {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.8rem;
+        color: var(--gold2);
+      }
+
+      @media (max-width: 768px) {
+        .timeline-axis {
+          left: 20px;
+        }
+
+        .timeline-event:nth-child(odd),
+        .timeline-event:nth-child(even) {
+          padding-left: 70px;
+          padding-right: 0;
+          text-align: left;
+        }
+
+        .timeline-dot {
+          left: 20px;
+        }
+
+        .timeline-event:nth-child(odd) .timeline-dot::before,
+        .timeline-event:nth-child(even) .timeline-dot::before {
+          left: -20px;
+          right: auto;
+        }
+      }
+    </style>
+</head>
+<body>
+<header style="margin-bottom: 60px; padding-bottom: 24px; border-bottom: 1px solid var(--border);">
+    <h1>Making Of</h1>
+    <p class="subtitle">1997–2026: The evolution of DJ Jesse Jay</p>
+    <nav style="display: flex; gap: 12px; margin-top: 20px;">
+        <a href="index.html" style="padding: 6px 12px; border: 1px solid var(--border); border-radius: 4px; color: var(--dim); text-decoration: none; font-size: .85rem; transition: all .2s;" onmouseover="this.style.borderColor = 'var(--gold)'; this.style.color = 'var(--gold2)';" onmouseout="this.style.borderColor = 'var(--border)'; this.style.color = 'var(--dim)';">← Back</a>
+    </nav>
+</header>
+
+<main>
+    <div class="timeline-container">
+        <div class="timeline-axis"></div>
+
+        <div class="timeline">
+            <div class="timeline-event">
+                <div class="timeline-dot"></div>
+                <div class="event-content">
+                    <div class="event-year">1997</div>
+                    <div class="event-phase">Genesis</div>
+                    <div class="event-title">Underground Club Era Begins</div>
+                    <div class="event-description">DJ Jesse Jay starts residencies at legendary Zürich venues: Aera, Labyrinth, SpiderGalaxy. Foundation of the progressive sound philosophy is established during early club sets in Zurich's underground scene.</div>
+                </div>
+            </div>
+
+            <div class="timeline-event">
+                <div class="timeline-dot"></div>
+                <div class="event-content">
+                    <div class="event-year">2000–2005</div>
+                    <div class="event-phase">Expansion</div>
+                    <div class="event-title">Club Residencies Solidify</div>
+                    <div class="event-description">Resident DJ at Take A Dance, Hermetschloo, Dachkantine. Develops signature sound across deep house, progressive, and minimal electrotrance. Builds reputation for meticulous pacing and emotional connection with dance floors.</div>
+                </div>
+            </div>
+
+            <div class="timeline-event">
+                <div class="timeline-dot"></div>
+                <div class="event-content">
+                    <div class="event-year">2008</div>
+                    <div class="event-phase">Broadcast</div>
+                    <div class="event-title">Radio LoRa Debut</div>
+                    <div class="event-description">Joins Galaxy Space Night on Radio LoRa 97.5. Begins broadcasting 6-hour sets every two weeks from Zürich studio. Transitions from club-only DJ to multimedia presence: club + radio + community.</div>
+                </div>
+            </div>
+
+            <div class="timeline-event">
+                <div class="timeline-dot"></div>
+                <div class="event-content">
+                    <div class="event-year">2010–2015</div>
+                    <div class="event-phase">Network</div>
+                    <div class="event-title">Galaxy Space Night Expands</div>
+                    <div class="event-description">GSN broadcasts expand to Radio Stadtfilter (Winterthur) and Radio RaBe (Bern). Multi-city presence on community radio across German-speaking Switzerland. Solidifies regional reputation and listener base.</div>
+                </div>
+            </div>
+
+            <div class="timeline-event">
+                <div class="timeline-dot"></div>
+                <div class="event-content">
+                    <div class="event-year">2015–2020</div>
+                    <div class="event-phase">Mastery</div>
+                    <div class="event-title">Craft Refinement & Tech Integration</div>
+                    <div class="event-description">Deep focus on CDJ mastery and vinyl artistry. Develops signature blend of minimal-maximal electrotrance. Equal emphasis on entry, main act, and outro pacing (principle since 1997). Explores early automation and live synchronization techniques.</div>
+                </div>
+            </div>
+
+            <div class="timeline-event">
+                <div class="timeline-dot"></div>
+                <div class="event-content">
+                    <div class="event-year">2020–2024</div>
+                    <div class="event-phase">Identity</div>
+                    <div class="event-title">Blue Dimension Brand Launch</div>
+                    <div class="event-description">Launch of Blue Dimension identity (djjessejay.ch redesign). Development of DJJJ Signature Bridge: audio-to-OSC architecture for live performance systems. Focus on computer vision, generative art, and audio-reactive visualization.</div>
+                </div>
+            </div>
+
+            <div class="timeline-event">
+                <div class="timeline-dot"></div>
+                <div class="event-content">
+                    <div class="event-year">2024–2026</div>
+                    <div class="event-phase">Evolution</div>
+                    <div class="event-title">Advanced Systems & Production</div>
+                    <div class="event-description">Continued evolution of production rig and live performance architecture. Integration of TouchDesigner, Ableton Live, OSC/DMX protocols. Exploration of AI-driven track analysis (local LLMs), cymatic visualization, and networked performance systems.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-label">Years Active</div>
+            <div class="legend-count">29</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-label">Radio Broadcasts</div>
+            <div class="legend-count">750+</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-label">Core Venues</div>
+            <div class="legend-count">8+</div>
+        </div>
+        <div class="legend-item">
+            <div class="legend-label">Radio Stations</div>
+            <div class="legend-count">3</div>
+        </div>
+    </div>
+
+    <section style="margin-top: 80px; padding: 40px; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;">
+        <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; color: var(--gold2); margin-bottom: 24px;">Philosophy Through Time</h2>
+        <div style="display: grid; gap: 20px; color: var(--dim);">
+            <p><strong style="color: var(--gold2);">1997–2005:</strong> Grassroots foundation. Club residencies establish the principle: equal weight to entry, main, and outro. Every moment matters.</p>
+            <p><strong style="color: var(--gold2);">2008–2015:</strong> Broadcasting brings precision. Radio format enforces narrative coherence—6-hour arcs demand careful pacing and listener connection beyond physical proximity.</p>
+            <p><strong style="color: var(--gold2);">2020–2026:</strong> Technology as expression. OSC, DMX, TouchDesigner, and computer vision become tools for translating emotional intensity into visual language. Progressive becomes multi-sensory.</p>
+        </div>
+    </section>
+</main>
+
+<script>
+  // Parallax scroll effect on timeline
+  window.addEventListener('scroll', () => {
+    const timeline = document.querySelector('.timeline-axis');
+    if (!timeline) return;
+    const scrollProgress = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+    timeline.style.background = `linear-gradient(to bottom, var(--gold) 0%, var(--gold) ${Math.min(scrollProgress * 100, 100)}%, transparent ${Math.min(scrollProgress * 100 + 5, 105)}%)`;
+  });
+</script>
+</body>
+</html>

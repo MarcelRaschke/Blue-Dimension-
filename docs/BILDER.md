@@ -137,4 +137,4 @@ Nginx liefert `/assets/` mit `Cache-Control: public, immutable` und 30 Tagen Gü
 
 Die Musikseite hat in der Tabelle einen horizontalen Überlauf von 6 px bei 390 px Breite. Die Ursache ist die bestehende Tabelle, nicht die Bilder. Eine Lösung wäre ein Wrapper mit `overflow-x: auto`.
 
-Das Dockerfile kopiert alle Dateien des Repositorys ins Image, auch `RadioStudio.mov` (21 MB) und `DJPult.gif` (5,6 MB). Diese Dateien werden nicht ausgeliefert, vergrößern aber das Image. Ein Eintrag in `.dockerignore` würde das verhindern.
+~~Das Dockerfile kopiert alle Dateien des Repositorys ins Image, auch `RadioStudio.mov` (21 MB) und `DJPult.gif` (5,6 MB).~~ Behoben: Das Dockerfile kopiert nur `public/` ins Image, aber `docker build .` sendet davor den gesamten Repo-Root als Build-Context an den Daemon – ohne Ausschluss waren das ~30 MB Context pro Build, ~94 % davon `RadioStudio.mov` (21 MB), `DJPult.gif` (5,6 MB) und `JesseJayBanner.mov` (1,5 MB), keines davon ausgeliefert. Alle drei stehen jetzt in `.dockerignore`; simulierter Build-Context nach dem Fix: ~2,3 MB.

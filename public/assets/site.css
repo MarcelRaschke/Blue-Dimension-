@@ -42,7 +42,7 @@ a:focus-visible { outline: 2px solid var(--neon-pink); outline-offset: 2px; }
 .brand-logo { width: 32px; height: 32px; border-radius: 50%; }
 
 .site-nav { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; }
-.site-nav a { text-decoration: none; }
+.site-nav a { text-decoration: none; display: inline-block; padding: 0.5rem 2px; }
 .site-nav a[aria-current="page"] { color: var(--neon-pink); }
 
 .site-main {
@@ -96,6 +96,7 @@ h1 { color: var(--neon-pink); }
 .gallery img { width: 100%; height: auto; display: block; border-radius: 4px; }
 
 .lang-switch { display: flex; gap: 1rem; margin-bottom: 1rem; }
+.lang-switch a { display: inline-block; padding: 0.5rem 2px; }
 .lang-switch a[aria-current="true"] { color: var(--neon-pink); font-weight: 700; }
 
 .link-list { padding-left: 1.2rem; }
@@ -121,6 +122,21 @@ figure.art figcaption { margin-top: 0.4rem; font-size: 0.9rem; color: var(--mute
     margin-bottom: 2rem;
 }
 .art-grid figure.art { margin: 0; }
+
+/* Die Artwork-Galerie mischt Hochformat (brand-binary-decoder), Quadrat
+   (logo-vinyl) und Breitbild-Banner (credit-twodivision) nebeneinander in
+   einem Grid ohne feste Zeilenhöhe – das Ergebnis sind unregelmäßig hohe
+   Kacheln. aspect-ratio: 16/9 gibt jeder Kachel dieselbe Höhe; object-fit:
+   contain statt cover, weil ein harter Zuschnitt bei genau diesen drei
+   Bildern echten Inhalt kappen würde (Logo-Zeile oben bei binary-decoder,
+   "designed by …&@®†" an beiden Rändern bei credit-twodivision). panel
+   füllt den Letterbox-Rand als bewusste "auf Karte montiert"-Fläche statt
+   als Rendering-Lücke. */
+.art-grid figure.art img {
+    aspect-ratio: 16 / 9;
+    object-fit: contain;
+    background: var(--panel);
+}
 
 @media (max-width: 480px) {
     .site-header { flex-direction: column; align-items: flex-start; }
