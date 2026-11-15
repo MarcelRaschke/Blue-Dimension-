@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Track-Analyse</title>
+    <meta name="claude:viewport-fit-sides" content="cover">
+    <style>
+        :root {
+            --bg: #0a0e27;
+            --fg: #e0e0ff;
+            --accent: #d4af37;
+            --accent-dim: #9d8c1f;
+            --card-bg: #151a38;
+            --border: #2a3050;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --error: #ef4444;
+            --info: #60a5fa;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                color-scheme: dark;
+            }
+        }
+
+        :root[data-theme="dark"] {
+            color-scheme: dark;
+        }
+
+        body {
+            margin: 0;
+            padding-left: max(16px, env(safe-area-inset-left, 0px));
+            padding-right: max(16px, env(safe-area-inset-right, 0px));
+            padding-top: 16px;
+            padding-bottom: 16px;
+            background: var(--bg);
+            color: var(--fg);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            color: var(--accent);
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .header p {
+            margin: 0;
+            color: var(--fg);
+            opacity: 0.8;
+            font-size: 13px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            padding: 10px 16px;
+            background: transparent;
+            border: none;
+            color: var(--fg);
+            cursor: pointer;
+            font-size: 14px;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            border-bottom-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .tab-button:hover {
+            color: var(--accent-dim);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-card .label {
+            font-size: 11px;
+            color: var(--fg);
+            opacity: 0.6;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card .value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent);
+            margin-top: 4px;
+        }
+
+        .section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .section h3 {
+            margin: 0 0 12px 0;
+            font-size: 15px;
+            color: var(--accent);
+        }
+
+        .pipeline-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .pipeline-stage {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .pipeline-stage .label {
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+
+        .pipeline-stage .desc {
+            color: var(--fg);
+            opacity: 0.8;
+            font-size: 12px;
+        }
+
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .feature-item {
+            display: flex;
+            gap: 8px;
+            padding: 8px;
+            background: rgba(212, 175, 55, 0.05);
+            border-radius: 4px;
+            border-left: 2px solid var(--accent);
+        }
+
+        .feature-item .icon {
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .feature-item .text {
+            flex: 1;
+        }
+
+        .feature-item .label {
+            font-weight: 600;
+            color: var(--fg);
+        }
+
+        .feature-item .desc {
+            color: var(--fg);
+            opacity: 0.7;
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        th {
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--accent);
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+        }
+
+        td {
+            padding: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:hover {
+            background: rgba(212, 175, 55, 0.02);
+        }
+
+        .model-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .model-btn {
+            padding: 8px 12px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .model-btn:hover {
+            background: rgba(212, 175, 55, 0.2);
+        }
+
+        .model-btn.active {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .latency-bar {
+            background: linear-gradient(to right, var(--success), var(--warning), var(--error));
+            height: 6px;
+            border-radius: 3px;
+            margin: 8px 0;
+        }
+
+        .latency-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--fg);
+            opacity: 0.6;
+        }
+
+        .checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .checklist-item {
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        .checklist-item input[type="checkbox"] {
+            margin-top: 4px;
+            cursor: pointer;
+            accent-color: var(--accent);
+        }
+
+        .checklist-item label {
+            flex: 1;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .checklist-item input:checked + label {
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 12px;
+            font-family: "Monaco", "Courier New", monospace;
+            font-size: 11px;
+            overflow-x: auto;
+            color: var(--success);
+            margin: 8px 0;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 4px;
+            border-left: 3px solid;
+            margin-bottom: 12px;
+        }
+
+        .alert.info {
+            background: rgba(96, 165, 250, 0.1);
+            border-left-color: var(--info);
+            color: var(--fg);
+        }
+
+        .alert.warning {
+            background: rgba(251, 191, 36, 0.1);
+            border-left-color: var(--warning);
+            color: var(--fg);
+        }
+
+        .flow-chart {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 12px;
+            font-size: 12px;
+            line-height: 1.8;
+            font-family: monospace;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>AI Track-Analyse</h1>
+        <p>Phase 4A: Local LLM Feature Extraction für DJJJ Signature Bridge</p>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-button active" onclick="switchTab('architecture')">Architecture</button>
+        <button class="tab-button" onclick="switchTab('models')">Models & GPU</button>
+        <button class="tab-button" onclick="switchTab('pipeline')">Pipeline</button>
+        <button class="tab-button" onclick="switchTab('failsafe')">Failsafe</button>
+        <button class="tab-button" onclick="switchTab('checklist')">Pre-Show</button>
+    </div>
+
+    <!-- Architecture Tab -->
+    <div id="architecture" class="tab-content active">
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="label">Polling Rate</div>
+                <div class="value">30 Hz</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Heuristic Latency</div>
+                <div class="value">&lt; 50ms</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">LLM Timeout</div>
+                <div class="value">500ms</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Cache Capacity</div>
+                <div class="value">1000 Tracks</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>System Integration</h3>
+            <div class="flow-chart">
+Phase 3D (Audio Ingestion)
+    ↓
+[30Hz Frequency Bins] → OSC /djjj/freqs/[0..7]
+    ↓
+┌─────────────────────────────────────────────────────┐
+│ Phase 4A: AI Track-Analyse                          │
+│ • Heuristic: spectral features (librosa)            │
+│ • LLM: semantic mood (local llama.cpp)              │
+│ • Failsafe: timeout recovery to heuristic           │
+└─────────────────────────────────────────────────────┘
+    ↓
+OSC /djjj/ai/* → TouchDesigner (Phase 4B)
+    ↓
+[GLSL GPU Shaders: Audio-Reactive Visuals]
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Feature Categories</h3>
+            <div class="feature-list">
+                <div class="feature-item">
+                    <div class="icon">🎵</div>
+                    <div class="text">
+                        <div class="label">Tonal Features</div>
+                        <div class="desc">Key estimation (chromagram), BPM (onset + tempo), confidence scores</div>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">📊</div>
+                    <div class="text">
+                        <div class="label">Spectral Features</div>
+                        <div class="desc">Centroid, spread, RMS energy, MFCC coefficients, zero-crossing rate</div>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">🎭</div>
+                    <div class="text">
+                        <div class="label">Semantic Features (LLM)</div>
+                        <div class="desc">Mood descriptors, sonic characteristics, energy trajectory prediction</div>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">💾</div>
+                    <div class="text">
+                        <div class="label">Local Cache</div>
+                        <div class="desc">SQLite: track ID, features, timestamp for post-set analysis</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Models & GPU Tab -->
+    <div id="models" class="tab-content">
+        <div class="section">
+            <h3>Model Selection</h3>
+            <div class="model-selector">
+                <button class="model-btn active" onclick="selectModel('mistral')">Mistral 7B Q5</button>
+                <button class="model-btn" onclick="selectModel('llama')">Llama 2 7B Q4</button>
+                <button class="model-btn" onclick="selectModel('phi')">Phi-3 Mini Q4</button>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Model</th>
+                            <th>Quantization</th>
+                            <th>VRAM</th>
+                            <th>Tokens/s</th>
+                            <th>Context</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Mistral 7B Instruct</td>
+                            <td>Q5 (5-bit)</td>
+                            <td>5GB</td>
+                            <td>45–60</td>
+                            <td>32K</td>
+                        </tr>
+                        <tr>
+                            <td>Llama 2 7B</td>
+                            <td>Q4 (4-bit)</td>
+                            <td>4GB</td>
+                            <td>50–70</td>
+                            <td>4K</td>
+                        </tr>
+                        <tr>
+                            <td>Phi-3 Mini</td>
+                            <td>Q4</td>
+                            <td>2GB</td>
+                            <td>80–100</td>
+                            <td>4K</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Latency Profile</h3>
+            <div style="padding: 12px;">
+                <div style="margin-bottom: 16px;">
+                    <div style="font-weight: 600; margin-bottom: 4px;">Heuristic Path (Librosa)</div>
+                    <div class="latency-bar" style="width: 5%;"></div>
+                    <div class="latency-label">
+                        <span>Target: &lt; 50ms</span>
+                        <span>30Hz = 33ms budget</span>
+                    </div>
+                </div>
+                <div style="margin-bottom: 16px;">
+                    <div style="font-weight: 600; margin-bottom: 4px;">LLM Inference (Mistral Q5, GPU)</div>
+                    <div class="latency-bar" style="width: 30%;"></div>
+                    <div class="latency-label">
+                        <span>Typical: 150–400ms</span>
+                        <span>Timeout: 500ms</span>
+                    </div>
+                </div>
+                <div>
+                    <div style="font-weight: 600; margin-bottom: 4px;">Total Pipeline (with fallback)</div>
+                    <div class="latency-bar" style="width: 15%;"></div>
+                    <div class="latency-label">
+                        <span>Never blocks real-time</span>
+                        <span>Failsafe ensures &lt; 500ms</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>GPU Acceleration</h3>
+            <div class="code-block">
+# CUDA (Nvidia)
+./llama-server -m mistral-7b-instruct-q5.gguf \
+  --port 8001 -ngl 40 --threads 8
+
+# HIP (AMD)
+export ROCM_PATH=/opt/rocm
+./llama-server -m mistral-7b-instruct-q5.gguf \
+  --port 8001 -ngl 40
+
+# CPU fallback (30–40 tokens/s)
+./llama-server -m mistral-7b-instruct-q5.gguf \
+  --port 8001 -c 512
+            </div>
+        </div>
+    </div>
+
+    <!-- Pipeline Tab -->
+    <div id="pipeline" class="tab-content">
+        <div class="section">
+            <h3>30Hz Heuristic Path</h3>
+            <div class="pipeline-flow">
+                <div class="pipeline-stage">
+                    <div class="label">Input</div>
+                    <div class="desc">Audio chunk (2048 samples, 48kHz) from Phase 3D buffer</div>
+                </div>
+                <div class="pipeline-stage">
+                    <div class="label">Preprocessing</div>
+                    <div class="desc">Normalize to [-1, 1], apply Hann window, compute magnitude spectrum (FFT)</div>
+                </div>
+                <div class="pipeline-stage">
+                    <div class="label">Spectral Analysis</div>
+                    <div class="desc">Centroid, spread, RMS, MFCC, chromagram, onset detection</div>
+                </div>
+                <div class="pipeline-stage">
+                    <div class="label">Tonal Estimation</div>
+                    <div class="desc">Key from chromagram (±1 semitone), BPM from onset tempo (±2 bpm)</div>
+                </div>
+                <div class="pipeline-stage">
+                    <div class="label">Mood Mapping</div>
+                    <div class="desc">Spectral centroid → mood: warm_dark | balanced | bright_energetic</div>
+                </div>
+                <div class="pipeline-stage">
+                    <div class="label">Output</div>
+                    <div class="desc">OSC /djjj/ai/* (key, bpm, energy, mood, source="heuristic")</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Per-Track LLM Enrichment (Optional)</h3>
+            <div class="alert info">
+                <strong>Trigger:</strong> Every 8–12 bars (~16s @ 120bpm) or on track change
+            </div>
+            <div class="pipeline-flow">
+                <div class="pipeline-stage">
+                    <div class="label">Track Metadata</div>
+                    <div class="desc">Key, BPM, artist, title from CDJ MIDI (via Phase 3D)</div>
+                </div>
+                <div class="pipeline-stage">
+                    <div class="label">Prompt Construction</div>
+                    <div class="desc">280–320 tokens: metadata + heuristic features + mood descriptors</div>
+                </div>
+                <div class="pipeline-stage">
+                    <div class="label">LLM Inference</div>
+                    <div class="desc">Mistral 7B Q5 (llama.cpp) @ 45–60 tokens/s, timeout 500ms</div>
+                </div>
+                <div class="pipeline-stage">
+                    <div class="label">Response Parsing</div>
+                    <div class="desc">Extract JSON: mood, sonic_descriptor, energy trajectory</div>
+                </div>
+                <div class="pipeline-stage">
+                    <div class="label">Enriched Output</div>
+                    <div class="desc">OSC /djjj/ai/* (same schema, source="llm") + cache store</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>OSC Broadcast Schema</h3>
+            <div class="code-block">
+/djjj/ai/key              # string: "C minor", "A# major"
+/djjj/ai/bpm              # float: 120.5
+/djjj/ai/energy           # float: 0–100
+/djjj/ai/mood             # string: "energetic_techno", "warm_dark"
+/djjj/ai/sonic_descriptor # string: "layered, hypnotic"
+/djjj/ai/source           # string: "llm" | "heuristic"
+/djjj/ai/spectral_centroid # float: Hz
+/djjj/ai/bpm_confidence   # float: 0–1
+            </div>
+        </div>
+    </div>
+
+    <!-- Failsafe Tab -->
+    <div id="failsafe" class="tab-content">
+        <div class="section">
+            <h3>Failsafe Protocol</h3>
+            <div class="alert warning">
+                <strong>Philosophy:</strong> Analysis never blocks real-time DJ pipeline. On any timeout or error, fallback to heuristic immediately.
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Failure Scenarios & Recovery</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Scenario</th>
+                            <th>Detection</th>
+                            <th>Recovery</th>
+                            <th>Latency Impact</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>LLM Server Down</td>
+                            <td>Connection refused</td>
+                            <td>Use heuristic, log once per session</td>
+                            <td>Fallback &lt; 50ms</td>
+                        </tr>
+                        <tr>
+                            <td>Inference Timeout</td>
+                            <td>asyncio.TimeoutError after 500ms</td>
+                            <td>Use heuristic, retry LLM next trigger</td>
+                            <td>None (timeout enforced)</td>
+                        </tr>
+                        <tr>
+                            <td>Network Latency Spike</td>
+                            <td>Response time &gt; 500ms</td>
+                            <td>Discard, use heuristic</td>
+                            <td>None (async, non-blocking)</td>
+                        </tr>
+                        <tr>
+                            <td>GPU Memory Exhaustion</td>
+                            <td>llama.cpp OOM message</td>
+                            <td>Restart llama-server, use CPU-only</td>
+                            <td>Degraded to 30–40 tokens/s</td>
+                        </tr>
+                        <tr>
+                            <td>Librosa Library Error</td>
+                            <td>Exception in feature extraction</td>
+                            <td>Use fallback: flat spectrum, BPM=0, mood="unknown"</td>
+                            <td>None (cached fallback)</td>
+                        </tr>
+                        <tr>
+                            <td>OSC Broadcast Failure</td>
+                            <td>UDP send error</td>
+                            <td>Log, continue analysis (cache locally)</td>
+                            <td>None (OSC is fire-and-forget)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Monitoring Metrics</h3>
+            <div class="feature-list">
+                <div class="feature-item">
+                    <div class="icon">📊</div>
+                    <div class="text">
+                        <div class="label">Inference Latency</div>
+                        <div class="desc">Target: &lt; 50ms (heuristic), &lt; 500ms (LLM). Log per-track.</div>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">🎯</div>
+                    <div class="text">
+                        <div class="label">LLM Availability</div>
+                        <div class="desc">% of LLM-triggered analyses that complete within timeout</div>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">⚙️</div>
+                    <div class="text">
+                        <div class="label">Fallback Rate</div>
+                        <div class="desc">% of analyses using heuristic (target &gt; 95% success rate)</div>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="icon">💾</div>
+                    <div class="text">
+                        <div class="label">Memory Usage</div>
+                        <div class="desc">llama.cpp + cache &lt; 6GB total. Thermal: GPU &lt; 80°C.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checklist Tab -->
+    <div id="checklist" class="tab-content">
+        <div class="section">
+            <h3>Pre-Performance Deployment (30 min)</h3>
+            <div class="checklist">
+                <div class="checklist-item">
+                    <input type="checkbox" id="check1">
+                    <label for="check1">llama.cpp compiled with CUDA/HIP support</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check2">
+                    <label for="check2">Model file present: mistral-7b-instruct-q5.gguf (5.2GB)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check3">
+                    <label for="check3">llama-server running on localhost:8001</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check4">
+                    <label for="check4">Python dependencies: librosa, essentia, pythonosc, aiohttp</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check5">
+                    <label for="check5">OSC broadcaster connected to TouchDesigner CHOP receiver</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check6">
+                    <label for="check6">SQLite cache DB initialized (auto-created on first run)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check7">
+                    <label for="check7">Inject test track, verify heuristic OSC output (/djjj/ai/*)</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check8">
+                    <label for="check8">Verify LLM path: trigger, check &lt; 500ms timeout recovery</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check9">
+                    <label for="check9">Monitor thermal status: GPU temp logging active</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check10">
+                    <label for="check10">Phase 3D Bridge running: OSC frequency bins @ 30Hz</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check11">
+                    <label for="check11">Phase 4B shaders subscribed to /djjj/ai/energy, /djjj/ai/mood</label>
+                </div>
+                <div class="checklist-item">
+                    <input type="checkbox" id="check12">
+                    <label for="check12">Dry-run: 5–10 min test set with all systems live</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Performance Validation</h3>
+            <div class="alert info">
+                <strong>Success Criteria:</strong>
+                <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+                    <li>Heuristic analysis: &lt; 50ms per chunk (30Hz sustained)</li>
+                    <li>LLM inference: &lt; 500ms per trigger (per 8–12 bars)</li>
+                    <li>OSC broadcast: zero dropouts in 30min session</li>
+                    <li>GPU memory: stable &lt; 6GB, temp &lt; 80°C</li>
+                    <li>Fallback rate: &lt; 5% (LLM unavailable)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabName) {
+            // Hide all tabs
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            // Remove active from all buttons
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+
+            // Activate button
+            event.target.classList.add('active');
+        }
+
+        function selectModel(model) {
+            const buttons = document.querySelectorAll('.model-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
