@@ -30,6 +30,9 @@ const IMAGES = [
     'brand-binary-decoder' => ['width' => 1229, 'height' => 1536, 'alt' => 'Binärcode-Tafel, die Byte für Byte „DJ Jesse Jay“ in ASCII dekodiert, mit J·r-Logo, Zürich und Gründungsjahr 1997'],
     'member-card-cy8er' => ['width' => 760, 'height' => 428, 'alt' => 'Mitgliedskarte DJ Jesse Jay mit J·r-Logo, „cy8er c0wc0d3“, djjessejay.ch, Zürich und Radio LoRa 97.5'],
     'neon-sign-venue' => ['width' => 1280, 'height' => 427, 'alt' => 'Neon-Schild „DJ Jesse Jay“ mit Logo an einer Bar-Theke'],
+    'studio-radio-97-5' => ['width' => 1024, 'height' => 768, 'alt' => 'Radiostudio im Synthwave-Look: Plattenspieler, Mischpult und Mikrofon vor Geräte-Racks mit der Frequenzanzeige 97.5, Funkwellen und der nächtlichen Altstadt von Zürich am Wasser'],
+    'art-cymatic-mandala' => ['width' => 800, 'height' => 721, 'alt' => 'Kymatik-Mandala: Sternförmige heilige Geometrie mit Dreiecken und Kreisen, umgeben von Schallwellen-Bändern und einer Audio-Wellenform'],
+    'logo-wordmark-chrome' => ['width' => 719, 'height' => 268, 'alt' => 'Chrom-Schriftzug DJ Jesse Jay mit JJ-Emblem auf dunkelblauem Grund'],
 ];
 
 /** Relative URL of an image, usable from any page in public/. */

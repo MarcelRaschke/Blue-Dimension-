@@ -52,6 +52,30 @@ Gleiche Quelle, zweiter Upload-Ordner. Nr. 3 der 5 Anhänge (Logo J·Γ im blaue
 
 Nr. 16 (`brand-workflow-board`) überschritt bei Qualität 82 das 300-KB-Budget (316 KB); mit Qualität 78 liegt die Datei bei 283 KB. Siehe `QUALITY_OVERRIDES` in `scripts/build-images.py`. Die übrigen drei Bilder verwenden die Standardqualität 82. Nr. 17–19 haben keine Transparenz (Alpha durchgehend 255) und wurden wie gewohnt nach RGB konvertiert. Gesamtgewicht der 4 neuen Dateien: rund 500 KB.
 
+## Nachtrag: 3 weitere Bilder (Musik, Galerie)
+
+Dritter Upload-Ordner. Alle drei Quellen sind kleiner als 1536 px und werden in nativer Breite ausgeliefert, nicht hochskaliert.
+
+| Nr. | Quelle | Motiv | Original | Entscheidung | Web-Datei |
+| --- | --- | --- | --- | --- | --- |
+| 20 | 482cda0e-image.jpg | Radiostudio im Synthwave-Look: Plattenspieler, Mischpult, Mikrofon, Geräte-Racks mit Frequenzanzeige 97.5, Funkwellen, nächtliche Zürcher Altstadt am Wasser | 1024×768 | Musik (Radio-Archiv) | `studio-radio-97-5.webp` |
+| 21 | 5514215e-image.jpg | Kymatik-Mandala: heilige Geometrie mit Schallwellen-Bändern und Audio-Wellenform | 800×723 | Galerie | `art-cymatic-mandala.webp` |
+| 22 | 653615e3-image.jpg | Chrom-Schriftzug „DJ Jesse Jay“ mit JJ-Emblem auf Dunkelblau | 739×271 | Galerie | `logo-wordmark-chrome.webp` |
+
+Bildanalyse und Zuschnitt:
+
+1. Nr. 20 ist ein inhaltlicher Treffer für die Musikseite: Frequenz 97.5 (Radio LoRa), Studio-Setup und Zürcher Silhouette verankern das Radio-Archiv von Blue Dimension. Die News-Seite trägt bereits das LoRa-Mosaik (Nr. 5), daher steht das Studio auf der Musikseite. Kein Rand, kein Zuschnitt.
+2. Nr. 21 hat unten eine 2 px hohe graue Linie (Exportartefakt). Sie wird über `crop_bottom = 2` entfernt. Ergebnis 800×721.
+3. Nr. 22 hat links einen 20 px breiten schwarzen Balken und oben einen 3 px dunkleren Streifen. Dafür gibt es neu `CROP_LEFT_TOP` in `scripts/build-images.py`. Ergebnis 719×268. Das JJ-Emblem entspricht dem Neon-Schild (Nr. 19), nicht dem J·Γ-Badge (Nr. 13).
+
+Gewichte bei Qualität 82: 193 KB, 101 KB, 11 KB, zusammen rund 305 KB. Alle unter dem 300-KB-Budget pro Datei.
+
+Offene Punkte zu diesem Nachtrag:
+
+1. Nr. 20 zeigt verfremdete Herstellerlogos auf den Geräten (KI-typisch, nicht lesbar). Keine Marke ist erkennbar, die Herkunft sollte trotzdem wie unter „Herkunft und Rechte“ bestätigt werden.
+2. Markenführung: Es existieren nun zwei Logo-Familien, das J·Γ-Badge (Header, Favicon) und das JJ-Emblem (Neon-Schild, Chrom-Schriftzug). Welche Familie primär ist, entscheidet der Betreiber.
+3. Nr. 21 eignet sich als Referenz für audioreaktive Visuals (Kymatik) in `public/neon-wave.html` und den TouchDesigner-Shadern. Das ist nicht Teil dieser Änderung.
+
 ## Entscheidungen
 
 Format: WebP, Qualität 82, längste Kante höchstens 1536 px. Gesamtgewicht der 13 Dateien: 1,5 MB, gegenüber 11,6 MB der Originale. Das größte Einzelbild ist 286 KB.
@@ -93,8 +117,8 @@ Startseite: Hero-Wordmark unter der Einleitung.
 News: Radio LoRa 97.5 unter der Überschrift.
 Events: Poster unter der Einleitung.
 Biografie: DJ-Controller über dem Text.
-Musik: Infografik mit Vollbild-Link über der Tabelle.
-Galerie: neuer Abschnitt „Artwork“ über den Event-Fotos, inzwischen elf Bildern.
+Musik: Radiostudio 97.5 unter der Einleitung, danach Infografik mit Vollbild-Link über der Tabelle.
+Galerie: neuer Abschnitt „Artwork“ über den Event-Fotos, inzwischen dreizehn Bildern.
 Header: Logo in allen Seiten.
 
 Neue Bilder hinzufügen: Original in den Quellordner legen, Eintrag in `JOBS` ergänzen, Build ausführen, Eintrag in `IMAGES` ergänzen, Einbindung mit `figure_tag('<key>')` setzen. Die Tests schlagen fehl, bis alle Schritte erledigt sind.

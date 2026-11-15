@@ -22,6 +22,8 @@ render_page('Galerie', 'gallery.html', static function () use ($events): void { 
             <?= figure_tag('brand-binary-decoder', 'DJ Jesse Jay · Binärcode') ?>
             <?= figure_tag('member-card-cy8er', 'Mitgliedskarte · cy8er c0wc0d3') ?>
             <?= figure_tag('neon-sign-venue', 'Neon-Schild · Club') ?>
+            <?= figure_tag('art-cymatic-mandala', 'Kymatik · Klang als Geometrie') ?>
+            <?= figure_tag('logo-wordmark-chrome', 'Schriftzug · Chrom') ?>
         </div>
     </section>
     <?php foreach (array_reverse($events) as $event): ?>

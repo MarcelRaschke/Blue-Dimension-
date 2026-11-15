@@ -21,6 +21,7 @@ $listenLabel = static function (string $playUrl, int $eventId): string {
 render_page('Musik', 'music.html', static function () use ($tracks, $listenLabel): void { ?>
     <h1>Musik</h1>
     <p class="muted">Radio-Archiv von Blue Dimension und Galaxy Space Night.</p>
+    <?= figure_tag('studio-radio-97-5', 'Blue Dimension auf Radio LoRa 97.5, Donnerstag 00:00–06:00') ?>
     <?= figure_tag('infographic-elektronische-musik', 'Der Produktionsprozess elektronischer Musik') ?>
     <p><a href="<?= h(image_url('infographic-elektronische-musik')) ?>">Infografik in voller Größe öffnen</a></p>
     <table class="table">

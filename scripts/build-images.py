@@ -40,11 +40,22 @@ JOBS = [
     ("b82099e0-image.png", "brand-binary-decoder", 1536, 0),
     ("7ec057e6-image.jpg", "member-card-cy8er", 1536, 0),
     ("ae381d22-image.jpg", "neon-sign-venue", 1536, 0),
+    # Sources below 1536 px: kept at native size, never upscaled.
+    ("482cda0e-image.jpg", "studio-radio-97-5", 1024, 0),
+    # 2 px cut removes a grey scan line at the bottom edge.
+    ("5514215e-image.jpg", "art-cymatic-mandala", 800, 2),
+    # Left/top black bars are cut via CROP_LEFT_TOP below.
+    ("653615e3-image.jpg", "logo-wordmark-chrome", 739, 0),
 ]
 
 # Per-job overrides of WEBP_QUALITY, by output name. See the JOBS comment above.
 QUALITY_OVERRIDES = {
     "brand-workflow-board": 78,
+}
+
+# Pixels cut from the left and top edge, by output name (black export bars).
+CROP_LEFT_TOP = {
+    "logo-wordmark-chrome": (20, 3),
 }
 
 # Originals that are deliberately not published. See docs/BILDER.md, "Zurückgestellt".
@@ -59,12 +70,20 @@ APPLE_TOUCH_SIZE = 180
 PNG_FAVICON_SIZES = [32, 192]
 
 
-def convert(src: pathlib.Path, dst: pathlib.Path, max_edge: int, crop_bottom: int, quality: int = WEBP_QUALITY) -> tuple[int, int]:
+def convert(
+    src: pathlib.Path,
+    dst: pathlib.Path,
+    max_edge: int,
+    crop_bottom: int,
+    quality: int = WEBP_QUALITY,
+    crop_left_top: tuple[int, int] = (0, 0),
+) -> tuple[int, int]:
     """Write one WebP file and return its final pixel size."""
     with Image.open(src) as image:
         image = image.convert("RGB")
-        if crop_bottom:
-            image = image.crop((0, 0, image.width, image.height - crop_bottom))
+        left, top = crop_left_top
+        if crop_bottom or left or top:
+            image = image.crop((left, top, image.width, image.height - crop_bottom))
         image.thumbnail((max_edge, max_edge), Image.LANCZOS)
         image.save(dst, "WEBP", quality=quality, method=6)
         return image.size
@@ -97,7 +116,14 @@ def main() -> int:
             print(f"missing source: {src}", file=sys.stderr)
             return 1
         dst = args.out / f"{name}.webp"
-        width, height = convert(src, dst, max_edge, crop_bottom, QUALITY_OVERRIDES.get(name, WEBP_QUALITY))
+        width, height = convert(
+            src,
+            dst,
+            max_edge,
+            crop_bottom,
+            QUALITY_OVERRIDES.get(name, WEBP_QUALITY),
+            CROP_LEFT_TOP.get(name, (0, 0)),
+        )
         print(f"{dst.name:40s} {width}x{height} {dst.stat().st_size // 1024} KB")
 
     build_favicons(args.source / FAVICON_SOURCE, args.public, args.out)
