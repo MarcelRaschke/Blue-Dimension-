@@ -16,6 +16,10 @@ jobs:
     environment:
       name: production
       url: https://djjessejay.ch
+    env:
+      # Secrets are not allowed in step-level `if:`. Expose the secret through the
+      # job env and test the env value instead.
+      KNOWN_HOSTS_SECRET: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
 
     steps:
       - name: Checkout code
@@ -71,10 +75,10 @@ jobs:
             ! -path "./.github/*" | wc -l
 
       - name: Write known_hosts for SSH scripts
-        if: ${{ secrets.DEPLOY_KNOWN_HOSTS != '' }}
+        if: ${{ env.KNOWN_HOSTS_SECRET != '' }}
         run: |
           mkdir -p ~/.ssh
-          printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/deploy_known_hosts
+          printf '%s\n' "$KNOWN_HOSTS_SECRET" > ~/.ssh/deploy_known_hosts
           chmod 600 ~/.ssh/deploy_known_hosts
 
       - name: Create pre-deployment backup
