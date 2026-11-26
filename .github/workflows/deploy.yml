@@ -20,8 +20,21 @@ jobs:
       # Secrets are not allowed in step-level `if:`. Expose the secret through the
       # job env and test the env value instead.
       KNOWN_HOSTS_SECRET: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+      SLACK_WEBHOOK_SECRET: ${{ secrets.SLACK_WEBHOOK }}
 
     steps:
+      - name: Check required deployment secrets
+        run: |
+          missing=0
+          for v in DEPLOY_KEY DEPLOY_HOST DEPLOY_USER; do
+            if [ -z "${!v}" ]; then echo "::error::Secret $v is not configured for the production environment"; missing=1; fi
+          done
+          exit $missing
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -100,8 +113,8 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_KEY }}
           REMOTE_HOST: ${{ secrets.DEPLOY_HOST }}
           REMOTE_USER: ${{ secrets.DEPLOY_USER }}
-          SOURCE_DIR: ./public/
-          REMOTE_PATH: /home/${{ secrets.DEPLOY_USER }}/public_html/
+          SOURCE: public/
+          TARGET: /home/${{ secrets.DEPLOY_USER }}/public_html/
           ARGS: "-avz --delete --checksum"
           EXCLUDE: |
             .git/
@@ -128,11 +141,11 @@ jobs:
           DEPLOY_KNOWN_HOSTS: ~/.ssh/deploy_known_hosts
 
       - name: Send Slack notification - success
-        if: success()
+        if: success() && env.SLACK_WEBHOOK_SECRET != ''
         uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
         with:
+          webhook: ${{ secrets.SLACK_WEBHOOK }}
+          webhook-type: incoming-webhook
           payload: |
             {
               "text": "✅ Deployment successful to production",
@@ -149,11 +162,11 @@ jobs:
         continue-on-error: true
 
       - name: Send Slack notification - failure with rollback
-        if: failure() && steps.verify.outcome == 'failure'
+        if: failure() && steps.verify.outcome == 'failure' && env.SLACK_WEBHOOK_SECRET != ''
         uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
         with:
+          webhook: ${{ secrets.SLACK_WEBHOOK }}
+          webhook-type: incoming-webhook
           payload: |
             {
               "text": "❌ Deployment failed and rolled back",
@@ -170,11 +183,11 @@ jobs:
         continue-on-error: true
 
       - name: Send Slack notification - deployment error
-        if: failure() && steps.deploy.outcome == 'failure'
+        if: failure() && steps.deploy.outcome == 'failure' && env.SLACK_WEBHOOK_SECRET != ''
         uses: slackapi/slack-github-action@dcb1066f776dd043e64d0e8ba94ca15cc7e1875d # v4.0.0
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
         with:
+          webhook: ${{ secrets.SLACK_WEBHOOK }}
+          webhook-type: incoming-webhook
           payload: |
             {
               "text": "⚠️ Deployment error - SFTP upload failed",
