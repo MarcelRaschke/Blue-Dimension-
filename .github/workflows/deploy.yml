@@ -97,14 +97,14 @@ jobs:
       - name: Create pre-deployment backup
         id: backup
         run: |
+          # GitHub does not expand "~" in env values, so build the path here.
+          export DEPLOY_KNOWN_HOSTS="$HOME/.ssh/deploy_known_hosts"
           chmod +x ./scripts/backup-deployment.sh
-          ./scripts/backup-deployment.sh "${{ secrets.DEPLOY_HOST }}" "${{ secrets.DEPLOY_USER }}" || {
-            echo "warning: Backup creation failed, continuing with deployment"
-          }
+          # No fallback: if the backup fails, the job stops before the upload.
+          ./scripts/backup-deployment.sh "$DEPLOY_HOST" "$DEPLOY_USER"
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_KNOWN_HOSTS: ~/.ssh/deploy_known_hosts
 
       - name: Deploy via SFTP
         id: deploy
@@ -130,15 +130,15 @@ jobs:
         if: failure() && steps.verify.outcome == 'failure'
         run: |
           echo "Health check failed, initiating rollback..."
+          export DEPLOY_KNOWN_HOSTS="$HOME/.ssh/deploy_known_hosts"
           chmod +x ./scripts/restore-deployment.sh
-          ./scripts/restore-deployment.sh "${{ secrets.DEPLOY_HOST }}" "${{ secrets.DEPLOY_USER }}" || {
+          ./scripts/restore-deployment.sh "$DEPLOY_HOST" "$DEPLOY_USER" || {
             echo "error: Rollback failed - manual intervention required"
             exit 1
           }
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_KNOWN_HOSTS: ~/.ssh/deploy_known_hosts
 
       - name: Send Slack notification - success
         if: success() && env.SLACK_WEBHOOK_SECRET != ''
